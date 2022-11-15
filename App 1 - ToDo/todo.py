@@ -115,7 +115,9 @@ while True:
                         else:
                             print("No task with that number exists in your TODO list.")
             case 'remove' | 'r':
-                user_action = format_input(input("Type (d)elete to a single task from your TODO list\nType (r)emove to remove all task marked as complete.\nType (s)how to cancel and view your list."))
+                print("TASK Deletion Options:")
+                print("Type (d)elete to a delete a single task from your TODO list\nType (r)emove to remove all task MARKED as COMPLETE.\nType (s)how to cancel and view your list.")
+                user_action = format_input(input("What remove operation do you want to do:.. "))
                 match user_action:
                     case 'delete' | 'd':
                         user_action = format_input(input("Select the number of the task to remove, or type (s)how to show the list again:.. "))
@@ -144,13 +146,17 @@ while True:
                             for i in todos:
                                 if i[0] != 'X':
                                     new_todos.append(i)
+                            removed_todos = len(todos) - len(new_todos)
                             todos = new_todos
-                            try:
-                                write_to_file(todos)
-                            except:
-                                print("Failed to save file to disk.")
+                            if removed_todos == 0:
+                                print("No tasked were removed as none were marked as Complete.")
                             else:
-                                print(f'Removed \n{removed_item}\nsuccessfully\n')
+                                try:
+                                    write_to_file(todos)
+                                except:
+                                    print("Failed to save file to disk.")
+                                else:
+                                    print(f'Removed \n{removed_todos}\nsuccessfully\n')
                         else:
                             show_list()
             case 'exit':
