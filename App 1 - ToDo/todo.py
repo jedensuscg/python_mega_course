@@ -33,7 +33,7 @@ else:
 
 user_action = ''
 print("*-------------------------------------------------------------*")
-print("WELOME TO THE TERMINAL OPERATED DAILY ORGANIZER (TODO) SOFTWARE")
+print("WELCOME TO THE TERMINAL OPERATED DAILY ORGANIZER (TODO) SOFTWARE")
 print("*-------------------------------------------------------------*")
 while True:
     if len(todos) == 0:
@@ -101,9 +101,10 @@ while True:
                     else:
                         if 0 <= mark_selection < len(todos):
                             result = ''
-                            text = todos[mark_selection]
+                            text = "X" + todos[mark_selection]
                             for c in text:
                                 result = result + c + '\u0336'
+    
                             todos[mark_selection] = result
                             try:
                                 write_to_file(todos)
@@ -114,17 +115,36 @@ while True:
                         else:
                             print("No task with that number exists in your TODO list.")
             case 'remove' | 'r':
-                user_action = format_input(input("Select the number of the task to remove, or type (s)how to show the list again:.. "))
-                if user_action == "show" or user_action == "s":
-                    show_list()
-                else:
-                    try:
-                        remove_selection = int(user_action) - 1
-                    except:
-                        print("You did not enter a number")
-                    else:
-                        if 0 <= remove_selection < len(todos):
-                            removed_item = todos.pop(remove_selection)
+                user_action = format_input(input("Type (d)elete to a single task from your TODO list\nType (r)emove to remove all task marked as complete.\nType (s)how to cancel and view your list."))
+                match user_action:
+                    case 'delete' | 'd':
+                        user_action = format_input(input("Select the number of the task to remove, or type (s)how to show the list again:.. "))
+                        if user_action == "show" or user_action == "s":
+                            show_list()
+                        else:
+                            try:
+                                remove_selection = int(user_action) - 1
+                            except:
+                                print("You did not enter a number")
+                            else:
+                                if 0 <= remove_selection < len(todos):
+                                    removed_item = todos.pop(remove_selection)
+                                    try:
+                                        write_to_file(todos)
+                                    except:
+                                        print("Failed to save file to disk.")
+                                    else:
+                                        print(f'Removed \n{removed_item}\nsuccessfully\n')
+                                else:
+                                    print("No task with that number exists in your TODO list.")
+                    case 'remove' | 'r':
+                        user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))
+                        if user_action == 'y':
+                            new_todos = []
+                            for i in todos:
+                                if i[0] != 'X':
+                                    new_todos.append(i)
+                            todos = new_todos
                             try:
                                 write_to_file(todos)
                             except:
@@ -132,7 +152,7 @@ while True:
                             else:
                                 print(f'Removed \n{removed_item}\nsuccessfully\n')
                         else:
-                            print("No task with that number exists in your TODO list.")
+                            show_list()
             case 'exit':
                 break
 print("Exiting")
