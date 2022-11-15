@@ -1,6 +1,13 @@
+from os import path
 import sys
+import os.path
 
-todos = []
+if os.path.exists("todos.txt"):
+    file = open('todos.txt', 'r', encoding="utf-8")
+    todos = file.readlines()
+else:
+    todos = []
+
 user_action = ''
 
 def format_input(input):
@@ -12,6 +19,12 @@ def show_list():
         print(f'{index + 1}: {item}')
     print("**End of TODO list.**")
 
+def write_to_file(todo_list):
+        file = open('todos.txt', 'r', encoding="utf-8")
+        todos = file.readlines()
+        todos.append(todo_list)
+        file = open('todos.txt', 'w', encoding="utf-8")
+        file.writelines(todo_list)
 
 while True:
     if len(todos) == 0:
@@ -20,8 +33,14 @@ while True:
         match user_action:
             case 'add' | 'a':
                 user_prompt = "Enter a ToDo Task:\n"
-                todo = input(user_prompt).capitalize()
+                todo = input(user_prompt).capitalize() + "\n"
                 todos.append(todo)
+                try:
+                    write_to_file(todos)
+                except:
+                    print("Failed to save file to disk.")
+                else:
+                    print(f'List updated')
             case 'exit':
                 break
     else:
@@ -29,8 +48,14 @@ while True:
         match user_action:
             case 'add' | 'a':
                 user_prompt = "Enter a ToDo Task:\n"
-                todo = input(user_prompt).capitalize()
+                todo = input(user_prompt + "\n").capitalize() + "\n"
                 todos.append(todo)
+                try:
+                    write_to_file(todos)
+                except:
+                    print("Failed to save file to disk.")
+                else:
+                    print(f'List updated')
             case 'show' | 's':
                show_list()
             case 'edit' | 'e':
@@ -45,9 +70,14 @@ while True:
                     else:
                         if 0 <= edit_selection < len(todos):
                             old_todo = todos[edit_selection]
-                            edit_todo = input("Enter new ToDo:\n").capitalize()
+                            edit_todo = input("Enter new ToDo:\n").capitalize()  + "\n"
                             todos[edit_selection] = edit_todo
-                            print(f'Replaced ToDO successfully \nOLD: {old_todo} \nNEW: {edit_todo} \n')
+                            try:
+                                write_to_file(todos)
+                            except:
+                                print("Failed to save file to disk.")
+                            else:
+                                print(f'Replaced ToDO successfully \nOLD: {old_todo} \nNEW: {edit_todo} \n')
                         else:
                             print("No item with that number exists in your list.")
             case 'complete' | 'c':
@@ -66,6 +96,12 @@ while True:
                             for c in text:
                                 result = result + c + '\u0336'
                             todos[mark_selection] = result
+                            try:
+                                write_to_file(todos)
+                            except:
+                                print("Failed to save file to disk.")
+                            else:
+                                print(f'Task {todos[mark_selection]} marked Complete.')
                         else:
                             print("No item with that number exists in your list.")
             case 'remove' | 'r':
@@ -80,7 +116,12 @@ while True:
                     else:
                         if 0 <= remove_selection < len(todos):
                             removed_item = todos.pop(remove_selection)
-                            print(f'Removed \n{removed_item}\nsuccessfully\n')
+                            try:
+                                write_to_file(todos)
+                            except:
+                                print("Failed to save file to disk.")
+                            else:
+                                print(f'Removed \n{removed_item}\nsuccessfully\n')
                         else:
                             print("No item with that number exists in your list.")
             case 'exit':
