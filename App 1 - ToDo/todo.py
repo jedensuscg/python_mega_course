@@ -52,16 +52,19 @@ def main():
                 print("\n***COMMANDS***")
                 print(f'Type {underline_text("add")} <<your task>> to add a new task')
                 print(f'Type {underline_text("show")} to see your list')
-                print(f'Type {underline_text("edit")} <<task #>> to edit a task')
+                print(f'Type {underline_text("edit")} <<task #>> <<new task>> to edit a task. You may also omit the new task to be prompted to enter it.')
                 print(f'Type {underline_text("mark")} <<task #>> to mark a task as completed but leave it in your list.')
                 print(f'Type {underline_text("delete")} <<task #>> to delete a single task from the list.')
                 print(f'Type {underline_text("remove")} to delete ALL MARKED tasks from list.')
                 print(f'\n{underline_text("EXAMPLE COMMANDS")}')
-                print("Adding a new task: add Clean House")
-                print("Edit task #3: edit 3")
+                print("ADD A NEW TASK: add Clean House")
+                print("EDIT TASK #3: edit 3 Clean house")
+                print("EDIT TASK #3 (secondary option): edit 3 NOTE: Omitting the new task will prompt you to enter one.")
+                print("DELETE TASK #3: delete 3")
                 print("******")
             else:
                 break
+
         if user_action.startswith("add"):
             todo = user_action[4:].capitalize()
             todo = "[ ] " + todo
@@ -72,18 +75,29 @@ def main():
                 print("Failed to save file to disk.")
             else:
                 print(f'List updated')
+
         elif user_action.startswith("show"):
             show_list(todos)
+
         elif user_action.startswith("edit"):
-            selection = user_action[4:]
+            selection = user_action[5]
             try:
                 selection = int(selection.strip()) - 1
-            except:
+            except ValueError:
                 print("You did not enter a number")
             else:
-                if 0 <= selection < len(todos):
-                    old_todo = todos[selection]
-                    edit_todo = input("Enter new a TODO task:\n").capitalize()
+                try:
+                    old_todo = todos[selection] 
+                except IndexError:
+                    print("No task with that number is in your list.")
+                else:
+                    if user_action[7:] == "":
+                        edit_todo = input("Enter new a TODO task:\n").capitalize()
+                    else:
+                        if user_action[6] != " ":
+                            edit_todo = user_action[6:].capitalize()
+                        else:
+                            edit_todo = user_action[7:].capitalize()
                     edit_todo = "[ ] " + edit_todo
                     todos[selection] = edit_todo
                     try:
@@ -92,21 +106,20 @@ def main():
                         print("Failed to save list to file.")
                     else:
                         print(f'Replaced TODO task successfully \nOLD: {old_todo} \nNEW: {edit_todo} \n')
-                else:
-                    print("No item with that number exists in your list.")
+
         elif user_action.startswith("mark"):
             selection = user_action[4:]
             try:
                 selection = int(selection.strip()) - 1
-            except:
+            except ValueError:
                 print("You did not enter a number")
             else:
-                if 0 <= selection < len(todos):
+                try:
+                    text = todos[selection]  
+                except IndexError:
+                    print("No task with that number is in your list.")
+                else:
                     result = ''
-                    text = todos[selection]
-                    # for c in text:
-                    #     result = result + c + '\u0336'
-
                     result = "[X] " + text[4:]
                     todos[selection] = result
                     try:
@@ -115,8 +128,7 @@ def main():
                         print("Failed to save file to disk.")
                     else:
                         print(f'Task {todos[selection]} marked Complete.')
-                else:
-                    print("No task with that number exists in your TODO list.")
+                
         elif user_action.startswith("remove"):
             user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))
             if user_action == 'y':
@@ -137,6 +149,7 @@ def main():
                         print(f'Removed \n{removed_todos}\nsuccessfully\n')
             else:
                 show_list(todos)
+        
         elif user_action.startswith("delete"):
             selection = user_action[6:]
             try:
@@ -144,16 +157,18 @@ def main():
             except:
                 print("You did not enter a number")
             else:
-                if 0 <= selection < len(todos):
+                try:
+                    text = todos[selection]  
+                except IndexError:
+                    print("No task with that number is in your list.")
+                else:
                     removed_item = todos.pop(selection)
+                    print(f'Removed task \'{removed_item[4:]}\' from list')
                     try:
                         write_to_file(todos)
                     except:
-                        print("Failed to save file to disk.")
-                    else:
-                        print(f'Removed \n{removed_item}\nsuccessfully\n')
-                else:
-                    print("No task with that number exists in your TODO list.")                
+                        print("Failed to save file to disk.")            
+        
         elif user_action.startswith("exit"):
             break
         else:
