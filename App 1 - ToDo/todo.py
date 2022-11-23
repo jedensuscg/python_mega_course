@@ -26,6 +26,9 @@ def print_welcome():
     print("WELCOME TO THE TERMINAL OPERATED DAILY ORGANIZER (TODO) SOFTWARE")
     print("*-------------------------------------------------------------*")
 
+def underline_text(text):
+    return "\x1B[4m" + text + "\x1B[0m"
+    
 def main():
     if os.path.exists("todos.txt"):
         with open('todos.txt', 'r', encoding="utf-8") as file:
@@ -47,12 +50,15 @@ def main():
             user_action = format_input(input("What would you like to do? Type COMMANDS for a list of commands\n"))
             if "commands" in user_action:
                 print("\n***COMMANDS***")
-                print("Type add <your task> to add a new Task")
-                print("Type show to see your list")
-                print("Type edit <task #> to edit a task: EXAMPLE - edit 2")
-                print("Type mark <task #> to mark a task as completed but leave it in your list.")
-                print("Type delete <task #> to delete a single task from the list.")
-                print("Type remove to delete all MARKED tasks from list.")
+                print(f'Type {underline_text("add")} <<your task>> to add a new task')
+                print(f'Type {underline_text("show")} to see your list')
+                print(f'Type {underline_text("edit")} <<task #>> to edit a task')
+                print(f'Type {underline_text("mark")} <<task #>> to mark a task as completed but leave it in your list.')
+                print(f'Type {underline_text("delete")} <<task #>> to delete a single task from the list.')
+                print(f'Type {underline_text("remove")} to delete ALL MARKED tasks from list.')
+                print(f'\n{underline_text("EXAMPLE COMMANDS")}')
+                print("Adding a new task: add Clean House")
+                print("Edit task #3: edit 3")
                 print("******")
             else:
                 break
@@ -66,9 +72,9 @@ def main():
                 print("Failed to save file to disk.")
             else:
                 print(f'List updated')
-        if 'show' in user_action:
+        elif 'show' in user_action:
             show_list(todos)
-        if 'edit' in user_action:
+        elif 'edit' in user_action:
             selection = user_action[4:]
             try:
                 selection = int(selection.strip()) - 1
@@ -78,6 +84,7 @@ def main():
                 if 0 <= selection < len(todos):
                     old_todo = todos[selection]
                     edit_todo = input("Enter new a TODO task:\n").capitalize()
+                    edit_todo = "[ ] " + edit_todo
                     todos[selection] = edit_todo
                     try:
                         write_to_file(todos)
@@ -87,7 +94,7 @@ def main():
                         print(f'Replaced TODO task successfully \nOLD: {old_todo} \nNEW: {edit_todo} \n')
                 else:
                     print("No item with that number exists in your list.")
-        if 'mark' in user_action:
+        elif 'mark' in user_action:
             selection = user_action[4:]
             try:
                 selection = int(selection.strip()) - 1
@@ -97,10 +104,10 @@ def main():
                 if 0 <= selection < len(todos):
                     result = ''
                     text = todos[selection]
-                    for c in text:
-                        result = result + c + '\u0336'
+                    # for c in text:
+                    #     result = result + c + '\u0336'
 
-                    result = "[X]" + result[5:]
+                    result = "[X] " + text[4:]
                     todos[selection] = result
                     try:
                         write_to_file(todos)
@@ -110,7 +117,7 @@ def main():
                         print(f'Task {todos[selection]} marked Complete.')
                 else:
                     print("No task with that number exists in your TODO list.")
-        if 'remove' in user_action:
+        elif 'remove' in user_action:
             user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))
             if user_action == 'y':
                 new_todos = []
@@ -129,8 +136,8 @@ def main():
                     else:
                         print(f'Removed \n{removed_todos}\nsuccessfully\n')
             else:
-                show_list()
-        if 'delete' in user_action:
+                show_list(todos)
+        elif 'delete' in user_action:
             selection = user_action[6:]
             try:
                 selection = int(selection.strip()) - 1
@@ -147,10 +154,10 @@ def main():
                         print(f'Removed \n{removed_item}\nsuccessfully\n')
                 else:
                     print("No task with that number exists in your TODO list.")                
-        if 'exit' in user_action:
+        elif 'exit' in user_action:
             break
         else:
-            print("!!!Command not recognized. Type commands to see list of available commands!!!\n")
+            print("!!! Command not recognized. Type commands to see list of available commands !!!\n")
     print("Exiting")
 
 if __name__ == "__main__":
