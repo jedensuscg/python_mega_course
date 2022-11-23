@@ -62,7 +62,7 @@ def main():
                 print("******")
             else:
                 break
-        if 'add' in user_action:
+        if user_action.startswith("add"):
             todo = user_action[4:].capitalize()
             todo = "[ ] " + todo
             todos.append(todo)
@@ -72,9 +72,9 @@ def main():
                 print("Failed to save file to disk.")
             else:
                 print(f'List updated')
-        elif 'show' in user_action:
+        elif user_action.startswith("show"):
             show_list(todos)
-        elif 'edit' in user_action:
+        elif user_action.startswith("edit"):
             selection = user_action[4:]
             try:
                 selection = int(selection.strip()) - 1
@@ -94,7 +94,7 @@ def main():
                         print(f'Replaced TODO task successfully \nOLD: {old_todo} \nNEW: {edit_todo} \n')
                 else:
                     print("No item with that number exists in your list.")
-        elif 'mark' in user_action:
+        elif user_action.startswith("mark"):
             selection = user_action[4:]
             try:
                 selection = int(selection.strip()) - 1
@@ -117,7 +117,7 @@ def main():
                         print(f'Task {todos[selection]} marked Complete.')
                 else:
                     print("No task with that number exists in your TODO list.")
-        elif 'remove' in user_action:
+        elif user_action.startswith("remove"):
             user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))
             if user_action == 'y':
                 new_todos = []
@@ -137,7 +137,7 @@ def main():
                         print(f'Removed \n{removed_todos}\nsuccessfully\n')
             else:
                 show_list(todos)
-        elif 'delete' in user_action:
+        elif user_action.startswith("delete"):
             selection = user_action[6:]
             try:
                 selection = int(selection.strip()) - 1
@@ -154,7 +154,7 @@ def main():
                         print(f'Removed \n{removed_item}\nsuccessfully\n')
                 else:
                     print("No task with that number exists in your TODO list.")                
-        elif 'exit' in user_action:
+        elif user_action.startswith("exit"):
             break
         else:
             print("!!! Command not recognized. Type commands to see list of available commands !!!\n")
