@@ -19,7 +19,10 @@ def show_list(todos):
 def write_to_file(todo_list):
         with open('todos.txt', 'w', encoding="utf-8") as file:
             for i in todo_list:
-                file.write(i + '\n')
+                if i[0] != "[":
+                    file.write("[ ] " + i + '\n')
+                else:
+                    file.write(i + '\n')
 
 def print_welcome():
     print("*-------------------------------------------------------------*")
@@ -28,8 +31,8 @@ def print_welcome():
 
 def underline_text(text):
     return "\x1B[4m" + text + "\x1B[0m"
-    
-def main():
+
+def get_todos():
     if os.path.exists("todos.txt"):
         with open('todos.txt', 'r', encoding="utf-8") as file:
             if file.readlines() == "":
@@ -38,11 +41,16 @@ def main():
                 file.seek(0)
                 todos_temp = file.readlines()
                 todos = [i.strip("\n") for i in todos_temp]
+                return todos
     else:
         file = open('todos.txt', 'w', encoding="utf-8")
         todos = []
+        return todos
 
+def main():
+    
 
+    todos = get_todos()
     print_welcome()
     
     while True:
@@ -68,6 +76,7 @@ def main():
         if user_action.startswith("add"):
             todo = user_action[4:].capitalize()
             todo = "[ ] " + todo
+            todos = get_todos()
             todos.append(todo)
             try:
                 write_to_file(todos)
@@ -77,6 +86,7 @@ def main():
                 print(f'List updated')
 
         elif user_action.startswith("show"):
+            todos = get_todos()
             show_list(todos)
 
         elif user_action.startswith("edit"):
@@ -99,6 +109,7 @@ def main():
                         else:
                             edit_todo = user_action[7:].capitalize()
                     edit_todo = "[ ] " + edit_todo
+                    todos = get_todos()
                     todos[selection] = edit_todo
                     try:
                         write_to_file(todos)
@@ -121,6 +132,7 @@ def main():
                 else:
                     result = ''
                     result = "[X] " + text[4:]
+                    todos = get_todos()
                     todos[selection] = result
                     try:
                         write_to_file(todos)
@@ -133,6 +145,7 @@ def main():
             user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))
             if user_action == 'y':
                 new_todos = []
+                todos = get_todos()
                 for i in todos:
                     if i[1] != 'X':
                         new_todos.append(i)
@@ -158,6 +171,7 @@ def main():
                 print("You did not enter a number")
             else:
                 try:
+                    todos = get_todos()
                     text = todos[selection]  
                 except IndexError:
                     print("No task with that number is in your list.")
