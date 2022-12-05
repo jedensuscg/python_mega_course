@@ -139,7 +139,7 @@ def main():
                     except:
                         print("Failed to save file to disk.")
                     else:
-                        print(f'Task {todos[selection]} marked Complete.')
+                        print(f'Task: {todos[selection][4:]} marked Complete.')
                 
         elif user_action.startswith("remove"):
             user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))

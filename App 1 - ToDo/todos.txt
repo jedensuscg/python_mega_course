@@ -1,3 +1,1 @@
-[ ] Feed dog
-[ ] Three
-[ ] Four
+[ ] Eat dinner
