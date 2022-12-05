@@ -1,9 +1,40 @@
 from os import path
 import sys
 import os.path
+import configparser
+import ast
 #TODO Add Help File
 
+last_file = ""
+file_list = []
+file_open = ""
+config = configparser.ConfigParser()
+def save_settings(file_open, files):
+    file_list_string = ""
+    with open("config.ini", "w") as configfile:
+        config.set('DEFAULT','lastfile',"todos.txt")
+        config.set('DEFAULT','filelist', f'{files}')
+        config.write(configfile)
+
+def load_settings():
+    if os.path.exists("config.ini"):
+        config.read("config.ini")
+        last_file = config['DEFAULT']['lastfile']
+        file_list =  ast.literal_eval(config['DEFAULT']['filelist'])
+        if len(file_list) < 2:
+            file_open = file_list[0]
+            print(file_open)
+    else:
+        print("No config found, creating new one.")
+        config['DEFAULT'] = {'lastfile' : "todos.txt", 'FileList' : ["todos.txt"]}
+        with open("config.ini", "w") as configfile:
+            config.write(configfile)
+
+
 def format_input(input):
+    """ Formats the input by lowercasing all 
+    words and removing leading and trailing spaces.
+    """
     return input.lower().strip()
 
 def show_list(todos):
@@ -16,8 +47,8 @@ def show_list(todos):
         print("----------LIST IS EMPTY-----------")
     print("\n**End of TODO list.**\n")
 
-def write_to_file(todo_list):
-        with open('todos.txt', 'w', encoding="utf-8") as file:
+def write_to_file(todo_list, todo_file = "todos.txt"):
+        with open(todo_file, 'w', encoding="utf-8") as file:
             for i in todo_list:
                 if i[0] != "[":
                     file.write("[ ] " + i + '\n')
@@ -32,9 +63,10 @@ def print_welcome():
 def underline_text(text):
     return "\x1B[4m" + text + "\x1B[0m"
 
-def get_todos():
-    if os.path.exists("todos.txt"):
-        with open('todos.txt', 'r', encoding="utf-8") as file:
+def get_todos(todo_file = "todos.txt"):
+    """ Opens todo file and returns list of tasks"""
+    if os.path.exists(todo_file):
+        with open(todo_file, 'r', encoding="utf-8") as file:
             if file.readlines() == "":
                 todos = []
             else:
@@ -43,13 +75,13 @@ def get_todos():
                 todos = [i.strip("\n") for i in todos_temp]
                 return todos
     else:
-        file = open('todos.txt', 'w', encoding="utf-8")
+        file = open(todo_file, 'w', encoding="utf-8")
         todos = []
         return todos
 
 def main():
     
-
+    load_settings()
     todos = get_todos()
     print_welcome()
     
@@ -184,6 +216,7 @@ def main():
                         print("Failed to save file to disk.")            
         
         elif user_action.startswith("exit"):
+            save_settings(file_open, file_list)
             break
         else:
             print("!!! Command not recognized. Type commands to see list of available commands !!!\n")

@@ -1,1 +1,3 @@
 [ ] Eat dinner
+[ ] Clean room
+[ ] Vacuum
