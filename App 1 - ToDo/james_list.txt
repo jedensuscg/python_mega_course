@@ -1,2 +1,1 @@
-[ ] Wash ashleys car
-[X] Do dishes
+[ ] Vacuum
