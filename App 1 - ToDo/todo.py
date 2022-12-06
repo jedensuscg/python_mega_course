@@ -8,6 +8,7 @@ import ast
 last_file = ""
 file_list = []
 file_open = ""
+file_to_edit = ''
 config = configparser.ConfigParser()
 
 def init_config():
@@ -23,6 +24,12 @@ def init_config():
             config.write(configfile)
         load_config()
 
+def startup():
+    config.read("config.ini")
+    if config.getboolean('DEFAULT','loadlastalways') == True:
+        return last_file
+    else:
+        return prompt_for_file()
 def save_config(file_open, files):
     file_list_string = ""
     with open("config.ini", "w") as configfile:
@@ -37,6 +44,7 @@ def load_config():
     if os.path.exists("config.ini"):
         config.read("config.ini")
         last_file = config['DEFAULT']['lastfile']
+        print(last_file)
         file_list = ast.literal_eval(config['DEFAULT']['filelist'])
     else:
         init_config()
@@ -75,25 +83,25 @@ def underline_text(text):
 
 def prompt_for_file():
 
-    while True:
-        print("Please select the number next to the TODO you want to use OR type NEW to create a new list")
-        for index, file in enumerate(file_list):
-            print(f'{index + 1}: {file}')
-        user_action = format_input(input("Enter selection: "))
-        if user_action == 'new':
-            add_new_file()
-        else:
-            try:
-                user_action = int(user_action)
-            except ValueError:
-                print("You did not enter a number")
+        while True:
+            print("Please select the number next to the TODO you want to use OR type NEW to create a new list")
+            for index, file in enumerate(file_list):
+                print(f'{index + 1}: {file}')
+            user_action = format_input(input("Enter selection: "))
+            if user_action == 'new':
+                add_new_file()
             else:
                 try:
-                    file_to_open = file_list[user_action - 1]
-                except IndexError:
-                    print("No file exist for number entered.")
+                    user_action = int(user_action)
+                except ValueError:
+                    print("You did not enter a number")
                 else:
-                    return file_to_open
+                    try:
+                        file_to_open = file_list[user_action - 1]
+                    except IndexError:
+                        print("No file exist for number entered.")
+                    else:
+                        return file_to_open
             
 def show_options(file_to_edit):
     while True:
@@ -126,11 +134,12 @@ def show_options(file_to_edit):
 def show_file_menu(file_to_edit):
     while True:
         print("**FILE MENU**\n")
-        user_action = format_input(input("Please make a selection:\n1: Select a different TODO file\n2: Add new TODO file:\n3: Exit Menu"))
+        user_action = format_input(input("Please make a selection:\n1: Select a different TODO file\n2: Add new TODO file \nType exit to cancel.\n"))
         if user_action == '1':
             file_to_edit = prompt_for_file()
             print(f'Changed to TODO list titled {file_to_edit[:4]}')
-            break
+            return file_to_edit
+            
         elif user_action == '2':
             new_file = add_new_file()
             save_config(file_to_edit, file_list)
@@ -138,8 +147,8 @@ def show_file_menu(file_to_edit):
                 user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
                 if user_action == 'y':
                     file_to_edit = new_file
-                    break
-        elif user_action == '3':
+                    return file_to_edit
+        elif user_action == 'exit':
             break
         else:
             print("Invalid Selection")
@@ -281,13 +290,13 @@ def main():
     
     load_config()
     print_welcome()
-    file_to_edit = prompt_for_file()
+    file_to_edit = startup()
     todos = get_todos(file_to_edit)
-    print_welcome()
     
     while True:
         while True:
             print("\n***MAIN MENU***")
+            print(f'Editing TODO list: {file_to_edit[:-4].replace("_"," ").title()}')
             user_action = format_input(input("What would you like to do? Type COMMANDS for a list of commands\n"))
             if "commands" in user_action:
                 print("\n***COMMANDS***")
@@ -329,7 +338,7 @@ def main():
              delete_task(user_action, file_to_edit)
 
         elif user_action.startswith("file"):
-            show_file_menu(file_to_edit)
+            file_to_edit = show_file_menu(file_to_edit)
 
         elif user_action.startswith("option"):
             show_options(file_to_edit)
