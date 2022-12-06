@@ -9,27 +9,37 @@ last_file = ""
 file_list = []
 file_open = ""
 config = configparser.ConfigParser()
-def save_settings(file_open, files):
+
+def init_config():
+        print("This appears to be the first time you have ran the TODO Software")
+        print("No config file found, creating new one.")
+        add_new_file()
+        config['DEFAULT'] = {
+        'LastFile' : 'todos.txt', 
+        'FileList' : [name],
+        'LoadLastAlways' : 'False'
+        }
+        with open("config.ini", "w") as configfile:
+            config.write(configfile)
+        load_config()
+
+def save_config(file_open, files):
     file_list_string = ""
     with open("config.ini", "w") as configfile:
-        config.set('DEFAULT','lastfile',"todos.txt")
-        config.set('DEFAULT','filelist', f'{files}')
+        config.set('DEFAULT','LastFile',file_open)
+        config.set('DEFAULT','FileList', f'{files}')
         config.write(configfile)
 
-def load_settings():
+def load_config():
+    global file_list
+    global last_file
+
     if os.path.exists("config.ini"):
         config.read("config.ini")
         last_file = config['DEFAULT']['lastfile']
-        file_list =  ast.literal_eval(config['DEFAULT']['filelist'])
-        if len(file_list) < 2:
-            file_open = file_list[0]
-            print(file_open)
+        file_list = ast.literal_eval(config['DEFAULT']['filelist'])
     else:
-        print("No config found, creating new one.")
-        config['DEFAULT'] = {'lastfile' : "todos.txt", 'FileList' : ["todos.txt"]}
-        with open("config.ini", "w") as configfile:
-            config.write(configfile)
-
+        init_config()
 
 def format_input(input):
     """ Formats the input by lowercasing all 
@@ -47,7 +57,7 @@ def show_list(todos):
         print("----------LIST IS EMPTY-----------")
     print("\n**End of TODO list.**\n")
 
-def write_to_file(todo_list, todo_file = "todos.txt"):
+def write_to_file(todo_list, todo_file):
         with open(todo_file, 'w', encoding="utf-8") as file:
             for i in todo_list:
                 if i[0] != "[":
@@ -62,6 +72,29 @@ def print_welcome():
 
 def underline_text(text):
     return "\x1B[4m" + text + "\x1B[0m"
+
+def prompt_for_file():
+
+    while True:
+        print("Please select the number next to the TODO you want to use OR type NEW to create a new list")
+        for index, file in enumerate(file_list):
+            print(f'{index + 1}: {file}')
+        user_action = format_input(input("Enter selection: "))
+        if user_action == 'new':
+            add_new_file()
+        else:
+            try:
+                user_action = int(user_action)
+            except ValueError:
+                print("You did not enter a number")
+            else:
+                try:
+                    file_to_open = file_list[user_action - 1]
+                except IndexError:
+                    print("No file exist for number entered.")
+                else:
+                    return file_to_open
+            
 
 def get_todos(todo_file = "todos.txt"):
     """ Opens todo file and returns list of tasks"""
@@ -79,10 +112,20 @@ def get_todos(todo_file = "todos.txt"):
         todos = []
         return todos
 
+def add_new_file():
+    name = format_input(input("Please enter a name for the initial TODO list:\n"))
+    name = name.replace(" ","_")
+    file_name = name + ".txt"
+    print(f'New TODO file named {name}')
+    file_list.append(file_name)
+    return file_name
+
 def main():
     
-    load_settings()
-    todos = get_todos()
+    load_config()
+    print_welcome()
+    file_to_edit = prompt_for_file()
+    todos = get_todos(file_to_edit)
     print_welcome()
     
     while True:
@@ -90,12 +133,15 @@ def main():
             user_action = format_input(input("What would you like to do? Type COMMANDS for a list of commands\n"))
             if "commands" in user_action:
                 print("\n***COMMANDS***")
+                print("*Task Commands*")
                 print(f'Type {underline_text("add")} <<your task>> to add a new task')
                 print(f'Type {underline_text("show")} to see your list')
                 print(f'Type {underline_text("edit")} <<task #>> <<new task>> to edit a task. You may also omit the new task to be prompted to enter it.')
                 print(f'Type {underline_text("mark")} <<task #>> to mark a task as completed but leave it in your list.')
                 print(f'Type {underline_text("delete")} <<task #>> to delete a single task from the list.')
                 print(f'Type {underline_text("remove")} to delete ALL MARKED tasks from list.')
+                print("*Program Commands*")
+                print(f'Type {underline_text("file")} to bring up the TODO file menu.')
                 print(f'\n{underline_text("EXAMPLE COMMANDS")}')
                 print("ADD A NEW TASK: add Clean House")
                 print("EDIT TASK #3: edit 3 Clean house")
@@ -108,17 +154,17 @@ def main():
         if user_action.startswith("add"):
             todo = user_action[4:].capitalize()
             todo = "[ ] " + todo
-            todos = get_todos()
+            todos = get_todos(file_to_edit)
             todos.append(todo)
             try:
-                write_to_file(todos)
+                write_to_file(todos,file_to_edit)
             except:
                 print("Failed to save file to disk.")
             else:
                 print(f'List updated')
 
         elif user_action.startswith("show"):
-            todos = get_todos()
+            todos = get_todos(file_to_edit)
             show_list(todos)
 
         elif user_action.startswith("edit"):
@@ -141,10 +187,10 @@ def main():
                         else:
                             edit_todo = user_action[7:].capitalize()
                     edit_todo = "[ ] " + edit_todo
-                    todos = get_todos()
+                    todos = get_todos(file_to_edit)
                     todos[selection] = edit_todo
                     try:
-                        write_to_file(todos)
+                        write_to_file(todos,file_to_edit)
                     except:
                         print("Failed to save list to file.")
                     else:
@@ -164,10 +210,10 @@ def main():
                 else:
                     result = ''
                     result = "[X] " + text[4:]
-                    todos = get_todos()
+                    todos = get_todos(file_to_edit)
                     todos[selection] = result
                     try:
-                        write_to_file(todos)
+                        write_to_file(todos,file_to_edit)
                     except:
                         print("Failed to save file to disk.")
                     else:
@@ -177,7 +223,7 @@ def main():
             user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))
             if user_action == 'y':
                 new_todos = []
-                todos = get_todos()
+                todos = get_todos(file_to_edit)
                 for i in todos:
                     if i[1] != 'X':
                         new_todos.append(i)
@@ -187,7 +233,7 @@ def main():
                     print("No tasked were removed as none were marked as Complete.")
                 else:
                     try:
-                        write_to_file(todos)
+                        write_to_file(todos,file_to_edit)
                     except:
                         print("Failed to save file to disk.")
                     else:
@@ -203,7 +249,7 @@ def main():
                 print("You did not enter a number")
             else:
                 try:
-                    todos = get_todos()
+                    todos = get_todos(file_to_edit)
                     text = todos[selection]  
                 except IndexError:
                     print("No task with that number is in your list.")
@@ -211,12 +257,33 @@ def main():
                     removed_item = todos.pop(selection)
                     print(f'Removed task \'{removed_item[4:]}\' from list')
                     try:
-                        write_to_file(todos)
+                        write_to_file(todos,file_to_edit)
                     except:
-                        print("Failed to save file to disk.")            
-        
+                        print("Failed to save file to disk.")    
+
+        elif user_action.startswith("file"):
+            while True:
+                print("**FILE MENU**\n")
+                user_action = format_input(input("Please make a selection:\n1: Select a different TODO file\n2: Add new TODO file:\n3: Exit Menu"))
+                if user_action == '1':
+                    file_to_edit = prompt_for_file()
+                    print(f'Changed to TODO list titled {file_to_edit[:4]}')
+                    break
+                elif user_action == '2':
+                    new_file = add_new_file()
+                    save_config()
+                    while True:
+                        user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
+                        if user_action == 'y':
+                            file_to_edit = new_file
+                            break
+                elif user_action == '3':
+                    break
+                else:
+                    print("Invalid Selection")
+
         elif user_action.startswith("exit"):
-            save_settings(file_open, file_list)
+            save_config(file_to_edit, file_list)
             break
         else:
             print("!!! Command not recognized. Type commands to see list of available commands !!!\n")
