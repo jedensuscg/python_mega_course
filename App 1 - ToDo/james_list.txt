@@ -1,3 +1,2 @@
-[ ] Eat dinner
-[ ] Clean room
-[ ] Vacuum
+[ ] Wash ashleys car
+[X] Do dishes

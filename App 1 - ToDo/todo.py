@@ -13,7 +13,7 @@ config = configparser.ConfigParser()
 def init_config():
         print("This appears to be the first time you have ran the TODO Software")
         print("No config file found, creating new one.")
-        add_new_file()
+        name = add_new_file()
         config['DEFAULT'] = {
         'LastFile' : 'todos.txt', 
         'FileList' : [name],
@@ -271,7 +271,7 @@ def main():
                     break
                 elif user_action == '2':
                     new_file = add_new_file()
-                    save_config()
+                    save_config(file_to_edit, file_list)
                     while True:
                         user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
                         if user_action == 'y':
