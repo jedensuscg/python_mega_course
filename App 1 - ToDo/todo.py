@@ -1,4 +1,5 @@
-from os import path
+from os import path, system, name
+import  psutil
 import sys
 import os.path
 import configparser
@@ -30,10 +31,14 @@ def startup():
         return last_file
     else:
         return prompt_for_file()
+
 def save_config(file_open, files):
     file_list_string = ""
     with open("config.ini", "w") as configfile:
         config.set('DEFAULT','LastFile',file_open)
+        for filename in files:
+            if not os.path.exists(filename):
+                files.remove(filename)
         config.set('DEFAULT','FileList', f'{files}')
         config.write(configfile)
 
@@ -86,7 +91,7 @@ def prompt_for_file():
         while True:
             print("Please select the number next to the TODO you want to use OR type NEW to create a new list")
             for index, file in enumerate(file_list):
-                print(f'{index + 1}: {file}')
+                print(f'{index + 1}: {file[:-4].title().replace("_"," ")}')
             user_action = format_input(input("Enter selection: "))
             if user_action == 'new':
                 add_new_file()
@@ -98,9 +103,11 @@ def prompt_for_file():
                 else:
                     try:
                         file_to_open = file_list[user_action - 1]
+                        file = file_to_open
                     except IndexError:
                         print("No file exist for number entered.")
                     else:
+                        title_bar(file)
                         return file_to_open
             
 def show_options(file_to_edit):
@@ -127,6 +134,7 @@ def show_options(file_to_edit):
                 else:
                     print("Invalid Selection")
         elif selection == 'exit':
+            title_bar(file_to_edit)
             break
         else:
             print("Invalid Selection")
@@ -137,7 +145,8 @@ def show_file_menu(file_to_edit):
         user_action = format_input(input("Please make a selection:\n1: Select a different TODO file\n2: Add new TODO file \nType exit to cancel.\n"))
         if user_action == '1':
             file_to_edit = prompt_for_file()
-            print(f'Changed to TODO list titled {file_to_edit[:4]}')
+            title_bar(file_to_edit)
+            print(f'\nChanged to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
             return file_to_edit
             
         elif user_action == '2':
@@ -146,9 +155,11 @@ def show_file_menu(file_to_edit):
             while True:
                 user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
                 if user_action == 'y':
+                    title_bar(new_file)
                     file_to_edit = new_file
                     return file_to_edit
         elif user_action == 'exit':
+            title_bar(file_to_edit)
             break
         else:
             print("Invalid Selection")
@@ -170,6 +181,7 @@ def get_todos(todo_file = "todos.txt"):
         return todos
 
 def add_new_file():
+    title_bar("Creating New TODO")
     name = format_input(input("Please enter a name for the initial TODO list:\n"))
     name = name.replace(" ","_")
     file_name = name + ".txt"
@@ -285,6 +297,22 @@ def delete_task(user_action, file_to_edit):
             except:
                 print("Failed to save file to disk.")   
 
+def clear():
+ # for windows
+    if name == 'nt':
+        _ = system('cls')
+ 
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = system('clear')
+    
+def title_bar(file_to_edit):
+    clear()
+    print('----------------------------TERMINAL OPERATED DAILY ORGANIZER----------------------------')
+    print(f'*********EDITING TODO LIST: {file_to_edit[:-4].replace("_"," ").title()}*********')
+    print('-----------------------------------------------------------------------------------------')
+
+   
 
 def main():
     
@@ -295,15 +323,17 @@ def main():
     
     while True:
         while True:
+
             print("\n***MAIN MENU***")
-            print(f'Editing TODO list: {file_to_edit[:-4].replace("_"," ").title()}')
             user_action = format_input(input("What would you like to do? Type COMMANDS for a list of commands\n"))
+
             if "commands" in user_action:
+                title_bar(file_to_edit)
                 print("\n***COMMANDS***")
                 print("*Task Commands*")
                 print(f'Type {underline_text("add")} <<your task>> to add a new task')
                 print(f'Type {underline_text("show")} to see your list')
-                print(f'Type {underline_text("edit")} <<task #>> <<new task>> to edit a task. You may also omit the new task to be prompted to enter it.')
+                print(f'Type {underline_text("edit")} <<task #>>z <<new task>> to edit a task. You may also omit the new task to be prompted to enter it.')
                 print(f'Type {underline_text("mark")} <<task #>> to mark a task as completed but leave it in your list.')
                 print(f'Type {underline_text("delete")} <<task #>> to delete a single task from the list.')
                 print(f'Type {underline_text("remove")} to delete ALL MARKED tasks from list.')
@@ -319,32 +349,41 @@ def main():
                 break
 
         if user_action.startswith("add"):
+            title_bar(file_to_edit)
             add_task(user_action, file_to_edit)
 
         elif user_action.startswith("show"):
+            title_bar(file_to_edit)
             todos = get_todos(file_to_edit)
             show_list(todos)
 
         elif user_action.startswith("edit"):
+            title_bar(file_to_edit)
             edit_task(user_action, file_to_edit)
 
         elif user_action.startswith("mark"):
+            title_bar(file_to_edit)
             mark_task(user_action, file_to_edit)
                 
         elif user_action.startswith("remove"):
-           remove_marked_tasks(file_to_edit)
+            title_bar(file_to_edit)
+            remove_marked_tasks(file_to_edit)
         
         elif user_action.startswith("delete"):
-             delete_task(user_action, file_to_edit)
+            title_bar(file_to_edit)
+            delete_task(user_action, file_to_edit)
 
         elif user_action.startswith("file"):
+            title_bar(file_to_edit)
             file_to_edit = show_file_menu(file_to_edit)
 
         elif user_action.startswith("option"):
+            title_bar(file_to_edit)
             show_options(file_to_edit)
 
         elif user_action.startswith("exit"):
             save_config(file_to_edit, file_list)
+            clear()
             break
         else:
             print("!!! Command not recognized. Type commands to see list of available commands !!!\n")
