@@ -1,8 +1,2 @@
-[ ] Pack clothes
+[ ] Exit
 [ ] Set alarm
-[ ] Toothbrush
-[ ] Wash house
-[ ] Clean the carport
-[ ] Clean the carport
-[ ] Clean the carport
-[ ] Clean the carport

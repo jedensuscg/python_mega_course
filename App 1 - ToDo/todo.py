@@ -11,6 +11,15 @@ file_open = ""
 file_to_edit = ''
 config = configparser.ConfigParser()
 
+def clear():
+ # for windows
+    if name == 'nt':
+        _ = system('cls')
+ 
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = system('clear')
+
 def init_config():
         print("This appears to be the first time you have ran the TODO Software")
         print("No config file found, creating new one.")
@@ -82,19 +91,28 @@ def print_welcome():
     print("WELCOME TO THE TERMINAL OPERATED DAILY ORGANIZER (TODO) SOFTWARE")
     print("*-------------------------------------------------------------*")
 
-def print_history_box(message):
-    msg_len = len(message) + 10
+def print_msg_box(message, title = "LAST ACTION ", sub_text = "type UNDO to undo last action "):
+    box_padding = 10
+    if (len(title) % 2 ) != 0: # Make message even for better border alignment
+        title = title + " "
+    if (len(sub_text) % 2 ) != 0: # Make message even for better border alignment
+        sub_text = sub_text + " "
+    if (len(message) % 2 ) != 0: # Make message even for better border alignment
+        message = message + " "
+    
+    box_width = len(message) + box_padding # Width of history box based on incoming message length plus padding
+
     print_spaces = lambda static_text_len : ' ' * int(get_spaces(static_text_len))
-    get_spaces = lambda static_text_len : (msg_len - (static_text_len + 2)) / 2
+    get_spaces = lambda static_text_len : (box_width - (static_text_len + 2)) / 2
     msg_spaces = ' ' * 4
     empty_spaces = len(message) + 8
-    print('*' * msg_len)
+    print('*' * box_width)
+    print(f'*{print_spaces(len(title))}{title}{print_spaces(len(title))}*')
     print(f'*{" " * empty_spaces}*')
-    print(f'*{print_spaces(11)}LAST ACTION{print_spaces(11)}*')
     print(f'*{msg_spaces}{message}{msg_spaces}*')
     print(f'*{" " * empty_spaces}*')
-    print(f'*{print_spaces(29)}type UNDO to undo last action{print_spaces(29)}*')
-    print('*' * msg_len)
+    print(f'*{print_spaces(len(sub_text))}{sub_text}{print_spaces(len(sub_text))}*')
+    print('*' * box_width)
 
 def underline_text(text):
     return "\x1B[4m" + text + "\x1B[0m"
@@ -159,18 +177,24 @@ def show_file_menu(file_to_edit):
         if user_action == '1':
             file_to_edit = prompt_for_file()
             title_bar(file_to_edit)
-            print(f'\nChanged to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
+            print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
             return file_to_edit
             
         elif user_action == '2':
             new_file = add_new_file()
             save_config(file_to_edit, file_list)
+            print_msg_box(f'Created a new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
             while True:
                 user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
                 if user_action == 'y':
                     title_bar(new_file)
                     file_to_edit = new_file
+                    print_msg_box(f'Switched to new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
                     return file_to_edit
+                elif user_action == 'n':
+                    break
+                else:
+                    print("Invalid Selection")
         elif user_action == 'exit':
             title_bar(file_to_edit)
             break
@@ -198,7 +222,6 @@ def add_new_file():
     name = format_input(input("Please enter a name for the initial TODO list:\n"))
     name = name.replace(" ","_")
     file_name = name + ".txt"
-    print(f'New TODO file named {name}')
     file_list.append(file_name)
     return file_name
 
@@ -212,7 +235,7 @@ def add_task(user_action, file_to_edit):
     except:
         print("Failed to save file to disk.")
     else:
-        print_history_box(f'Added {todo} to list.')
+        print_msg_box(f'Added {todo} to list.')
 
 def edit_task(user_action, file_to_edit):
     todos = get_todos(file_to_edit)
@@ -220,15 +243,16 @@ def edit_task(user_action, file_to_edit):
     try:
         selection = int(selection.strip()) - 1
     except ValueError:
-        print("You did not enter a number")
+        print_msg_box("You did not enter a number", "ERROR", "Enter a valid number")
     else:
         try:
             old_todo = todos[selection] 
         except IndexError:
-            print("No task with that number is in your list.")
+            print_msg_box("No task with that number is in your list.", "ERROR", "")
         else:
             if user_action[7:] == "":
-                edit_todo = input("Enter new a TODO task:\n").capitalize()
+                print_msg_box(f'Enter the new task for todo task {old_todo[4:].capitalize()}', "DIRECTIONS", " Type COMMAND for more info.")
+                edit_todo = input()
             else:
                 if user_action[6] != " ":
                     edit_todo = user_action[6:].capitalize()
@@ -242,7 +266,7 @@ def edit_task(user_action, file_to_edit):
             except:
                 print("Failed to save list to file.")
             else:
-                print(f'Replaced TODO task successfully \nOLD: {old_todo} \nNEW: {edit_todo} \n')
+                print_msg_box(f'Replaced TODO task successfully \'{old_todo[4:].capitalize()}\' with \'{edit_todo[4:].capitalize()}\' ')
 
 def mark_task(user_action, file_to_edit):
     todos = get_todos(file_to_edit)
@@ -250,12 +274,14 @@ def mark_task(user_action, file_to_edit):
     try:
         selection = int(selection.strip()) - 1
     except ValueError:
-        print("You did not enter a number")
+        title_bar(file_to_edit)
+        print_msg_box("You did not enter a number", "ERROR", "Enter a valid number")
     else:
         try:
             text = todos[selection]  
         except IndexError:
-            print("No task with that number is in your list.")
+            title_bar(file_to_edit)
+            print_msg_box("No task with that number is in your list.", "ERROR", "")
         else:
             result = ''
             result = "[X] " + text[4:]
@@ -266,30 +292,42 @@ def mark_task(user_action, file_to_edit):
             except:
                 print("Failed to save file to disk.")
             else:
-                print(f'Task: {todos[selection][4:]} marked Complete.')
+                title_bar(file_to_edit)
+                print_msg_box(f'Task: {todos[selection][4:].capitalize()} marked Complete.')
 
 def remove_marked_tasks(file_to_edit):
-    user_action = format_input(input("CONFIRM remove all completed tasks? (Y/N)... "))
-    if user_action == 'y':
-        new_todos = []
-        todos = get_todos(file_to_edit)
-        for i in todos:
-            if i[1] != 'X':
-                new_todos.append(i)
-        removed_todos = len(todos) - len(new_todos)
-        todos = new_todos
-        if removed_todos == 0:
-            print("No tasked were removed as none were marked as Complete.")
-        else:
-            try:
-                write_to_file(todos,file_to_edit)
-            except:
-                print("Failed to save file to disk.")
+    while True:
+        title_bar(file_to_edit)
+        
+        print_msg_box(f'CONFIRM remove all completed tasks? (Y/N)', "CONFIRMATION", "Type y or n to continue")
+        user_action = format_input(input())
+        if user_action == 'y':
+            new_todos = []
+            todos = get_todos(file_to_edit)
+            for i in todos:
+                if i[1] != 'X':
+                    new_todos.append(i)
+            removed_todos = len(todos) - len(new_todos)
+            todos = new_todos
+            if removed_todos == 0:
+                title_bar(file_to_edit)
+                print_msg_box("No tasked were removed as none were marked as Complete.", "NOTICE", "Type mark <task#> to mark tasks.")
+                break
             else:
-                print(f'Removed \n{removed_todos}\nsuccessfully\n')
-    else:
-        show_list(todos)
-
+                try:
+                    write_to_file(todos,file_to_edit)
+                except:
+                    print("Failed to save file to disk.")
+                else:
+                    title_bar(file_to_edit)
+                    print_msg_box(f'Removed {removed_todos} successfully')
+        elif user_action == 'n':
+            title_bar(file_to_edit)
+            break
+        else:
+            title_bar(file_to_edit)
+            print_msg_box("You did not type 'y' or 'n'", "ERROR", "")
+        
 def delete_task(user_action, file_to_edit):
     selection = user_action[6:]
     try:
@@ -310,14 +348,7 @@ def delete_task(user_action, file_to_edit):
             except:
                 print("Failed to save file to disk.")   
 
-def clear():
- # for windows
-    if name == 'nt':
-        _ = system('cls')
- 
-    # for mac and linux(here, os.name is 'posix')
-    else:
-        _ = system('clear')
+
     
 def title_bar(file_to_edit):
     clear()
@@ -336,7 +367,6 @@ def main():
     
     while True:
         while True:
-
             print("\n***MAIN MENU***")
             user_action = format_input(input("What would you like to do? Type COMMANDS for a list of commands\n"))
 
@@ -379,7 +409,6 @@ def main():
             mark_task(user_action, file_to_edit)
                 
         elif user_action.startswith("remove"):
-            title_bar(file_to_edit)
             remove_marked_tasks(file_to_edit)
         
         elif user_action.startswith("delete"):
