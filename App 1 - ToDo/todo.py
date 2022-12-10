@@ -1,5 +1,4 @@
 from os import path, system, name
-import  psutil
 import sys
 import os.path
 import configparser
@@ -82,6 +81,20 @@ def print_welcome():
     print("*-------------------------------------------------------------*")
     print("WELCOME TO THE TERMINAL OPERATED DAILY ORGANIZER (TODO) SOFTWARE")
     print("*-------------------------------------------------------------*")
+
+def print_history_box(message):
+    msg_len = len(message) + 10
+    print_spaces = lambda static_text_len : ' ' * int(get_spaces(static_text_len))
+    get_spaces = lambda static_text_len : (msg_len - (static_text_len + 2)) / 2
+    msg_spaces = ' ' * 4
+    empty_spaces = len(message) + 8
+    print('*' * msg_len)
+    print(f'*{" " * empty_spaces}*')
+    print(f'*{print_spaces(11)}LAST ACTION{print_spaces(11)}*')
+    print(f'*{msg_spaces}{message}{msg_spaces}*')
+    print(f'*{" " * empty_spaces}*')
+    print(f'*{print_spaces(29)}type UNDO to undo last action{print_spaces(29)}*')
+    print('*' * msg_len)
 
 def underline_text(text):
     return "\x1B[4m" + text + "\x1B[0m"
@@ -199,7 +212,7 @@ def add_task(user_action, file_to_edit):
     except:
         print("Failed to save file to disk.")
     else:
-        print(f'List updated')
+        print_history_box(f'Added {todo} to list.')
 
 def edit_task(user_action, file_to_edit):
     todos = get_todos(file_to_edit)
