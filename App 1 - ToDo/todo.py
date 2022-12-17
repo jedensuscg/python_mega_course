@@ -9,6 +9,10 @@ last_file = ""
 file_list = []
 file_open = ""
 file_to_edit = ''
+undo_opt = {
+    'last': '',
+    'data' : ''
+}
 config = configparser.ConfigParser()
 
 def clear():
@@ -225,7 +229,8 @@ def add_new_file():
     file_list.append(file_name)
     return file_name
 
-def add_task(user_action, file_to_edit):
+def add_task(user_action, file_to_edit, undo = False):
+    global undo_opt
     todo = user_action[4:].capitalize()
     todo = "[ ] " + todo
     todos = get_todos(file_to_edit)
@@ -235,7 +240,11 @@ def add_task(user_action, file_to_edit):
     except:
         print("Failed to save file to disk.")
     else:
-        print_msg_box(f'Added {todo} to list.')
+        if not undo:
+            print_msg_box(f'Added {todo[4:]} to list.')
+        else:
+            print_msg_box(f'Added {todo[4:]} to list via UNDO command.','UNDO','Type UNDO to REDO.')
+        undo_opt.update({'last':'add'})
 
 def edit_task(user_action, file_to_edit):
     todos = get_todos(file_to_edit)
@@ -303,13 +312,16 @@ def remove_marked_tasks(file_to_edit):
         user_action = format_input(input())
         if user_action == 'y':
             new_todos = []
+            removed_todos = []
             todos = get_todos(file_to_edit)
             for i in todos:
                 if i[1] != 'X':
                     new_todos.append(i)
-            removed_todos = len(todos) - len(new_todos)
+                elif i[1] == 'X':
+                    removed_todos.append(i)
             todos = new_todos
-            if removed_todos == 0:
+            print_msg_box(f'')
+            if len(removed_todos) == 0:
                 title_bar(file_to_edit)
                 print_msg_box("No tasked were removed as none were marked as Complete.", "NOTICE", "Type mark <task#> to mark tasks.")
                 break
@@ -320,7 +332,8 @@ def remove_marked_tasks(file_to_edit):
                     print("Failed to save file to disk.")
                 else:
                     title_bar(file_to_edit)
-                    print_msg_box(f'Removed {removed_todos} successfully')
+                    print_msg_box(f'Removed {len(removed_todos)} successfully')
+                    break
         elif user_action == 'n':
             title_bar(file_to_edit)
             break
@@ -328,26 +341,45 @@ def remove_marked_tasks(file_to_edit):
             title_bar(file_to_edit)
             print_msg_box("You did not type 'y' or 'n'", "ERROR", "")
         
-def delete_task(user_action, file_to_edit):
-    selection = user_action[6:]
+def delete_task(user_action, file_to_edit, undo = False):
+    global undo_opt
+    if not undo:
+        selection = user_action[6:]
+    else:
+        selection = user_action - 1
     try:
-        selection = int(selection.strip()) - 1
+        if not undo:
+            selection = int(selection.strip()) - 1
+        else:
+            pass
     except:
-        print("You did not enter a number")
+        print_msg_box("You did type a number",'ERROR','Enter a valid list number.')
     else:
         try:
             todos = get_todos(file_to_edit)
-            text = todos[selection]  
-        except IndexError:
-            print("No task with that number is in your list.")
-        else:
             removed_item = todos.pop(selection)
-            print(f'Removed task \'{removed_item[4:]}\' from list')
+        except IndexError:
+            print_msg_box("No task with that number is in your list.",'ERROR','Enter a valid list number.')
+        else:
+            if undo:
+                print_msg_box(f'Removed task \'{removed_item[4:]}\' via UNDO command', 'UNDO', 'type UNDO to REDO this command')
+                undo_opt.update({'last':'delete','data':removed_item})
+            else:
+                print_msg_box(f'Removed task \'{removed_item[4:]}\' from list')
+                undo_opt.update({'last':'delete','data':removed_item})
             try:
                 write_to_file(todos,file_to_edit)
             except:
                 print("Failed to save file to disk.")   
 
+def undo(undo, file_to_edit):
+    match undo['last']:
+        case "add":
+            selection = len(get_todos(file_to_edit))
+            delete_task(selection, file_to_edit, True)
+        case 'delete':
+            add_task(undo['data'],file_to_edit, True)
+            
 
     
 def title_bar(file_to_edit):
@@ -422,6 +454,10 @@ def main():
         elif user_action.startswith("option"):
             title_bar(file_to_edit)
             show_options(file_to_edit)
+
+        elif user_action.startswith("undo"):
+            title_bar(file_to_edit)
+            undo(undo_opt, file_to_edit)
 
         elif user_action.startswith("exit"):
             save_config(file_to_edit, file_list)
