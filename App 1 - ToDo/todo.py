@@ -277,32 +277,69 @@ def edit_task(user_action, file_to_edit):
             else:
                 print_msg_box(f'Replaced TODO task successfully \'{old_todo[4:].capitalize()}\' with \'{edit_todo[4:].capitalize()}\' ')
 
-def mark_task(user_action, file_to_edit):
+def mark_task(user_action, file_to_edit, mark = True, undo = False):
+    global undo_opt
     todos = get_todos(file_to_edit)
-    selection = user_action[4:]
-    try:
-        selection = int(selection.strip()) - 1
-    except ValueError:
-        title_bar(file_to_edit)
-        print_msg_box("You did not enter a number", "ERROR", "Enter a valid number")
-    else:
-        try:
-            text = todos[selection]  
-        except IndexError:
-            title_bar(file_to_edit)
-            print_msg_box("No task with that number is in your list.", "ERROR", "")
+
+    if mark:
+        if not undo:
+            selection = user_action[4:]
         else:
-            result = ''
-            result = "[X] " + text[4:]
-            todos = get_todos(file_to_edit)
-            todos[selection] = result
+            selection = str(user_action + 1)
+        try:
+            selection = int(selection.strip()) - 1
+        except ValueError:
+            title_bar(file_to_edit)
+            print_msg_box("You did not enter a number", "ERROR", "Enter a valid number")
+        else:
             try:
-                write_to_file(todos,file_to_edit)
-            except:
-                print("Failed to save file to disk.")
-            else:
+                text = todos[selection]  
+            except IndexError:
                 title_bar(file_to_edit)
-                print_msg_box(f'Task: {todos[selection][4:].capitalize()} marked Complete.')
+                print_msg_box("No task with that number is in your list.", "ERROR", "")
+            else:
+                result = ''
+                result = "[X] " + text[4:]
+                todos = get_todos(file_to_edit)
+                todos[selection] = result
+                try:
+                    write_to_file(todos,file_to_edit)
+                except:
+                    print("Failed to save file to disk.")
+                else:
+                    title_bar(file_to_edit)
+                    print_msg_box(f'Task: {todos[selection][4:].capitalize()} marked Complete.')
+                    undo_opt.update({'last':'mark','data':selection})
+    else:
+        if not undo:
+            selection = user_action[4:]
+        else:
+            selection = str(user_action + 1)
+        try:
+            selection = int(selection.strip()) - 1
+        except ValueError:
+            title_bar(file_to_edit)
+            print_msg_box("You did not enter a number", "ERROR", "Enter a valid number")
+        else:
+            try:
+                text = todos[selection]  
+            except IndexError:
+                title_bar(file_to_edit)
+                print_msg_box("No task with that number is in your list.", "ERROR", "")
+            else:
+                result = ''
+                result = "[ ] " + text[4:]
+                todos = get_todos(file_to_edit)
+                todos[selection] = result
+                try:
+                    write_to_file(todos,file_to_edit)
+                except:
+                    print("Failed to save file to disk.")
+                else:
+                    title_bar(file_to_edit)
+                    print_msg_box(f'Task: {todos[selection][4:].capitalize()} UNmarked.')
+                    undo_opt.update({'last':'unmark','data':selection}) 
+
 
 def remove_marked_tasks(file_to_edit):
     while True:
@@ -379,6 +416,10 @@ def undo(undo, file_to_edit):
             delete_task(selection, file_to_edit, True)
         case 'delete':
             add_task(undo['data'],file_to_edit, True)
+        case 'mark':
+            mark_task(undo['data'],file_to_edit, mark = False, undo = True)
+        case 'unmark':
+            mark_task(undo['data'],file_to_edit, mark = True, undo = True)
             
 
     
@@ -410,6 +451,7 @@ def main():
                 print(f'Type {underline_text("show")} to see your list')
                 print(f'Type {underline_text("edit")} <<task #>>z <<new task>> to edit a task. You may also omit the new task to be prompted to enter it.')
                 print(f'Type {underline_text("mark")} <<task #>> to mark a task as completed but leave it in your list.')
+                print(f'Type {underline_text("unmark")} <<task #>> to unmark a task as completed.')
                 print(f'Type {underline_text("delete")} <<task #>> to delete a single task from the list.')
                 print(f'Type {underline_text("remove")} to delete ALL MARKED tasks from list.')
                 print("*Program Commands*")
@@ -439,6 +481,11 @@ def main():
         elif user_action.startswith("mark"):
             title_bar(file_to_edit)
             mark_task(user_action, file_to_edit)
+
+        elif user_action.startswith("unmark"):
+            user_action = user_action.lstrip("un")
+            title_bar(file_to_edit)
+            mark_task(user_action, file_to_edit, mark = False)
                 
         elif user_action.startswith("remove"):
             remove_marked_tasks(file_to_edit)
