@@ -66,7 +66,7 @@ def load_config():
     if os.path.exists("config.ini"):
         config.read("config.ini")
         last_file = config['DEFAULT']['lastfile']
-        print(last_file)
+        print("Opening last file called: "+ last_file)
         file_list = ast.literal_eval(config['DEFAULT']['filelist'])
     else:
         init_config()
@@ -86,6 +86,9 @@ def show_list(todos):
     else:
         print("----------LIST IS EMPTY-----------")
     print("\n**End of TODO list.**\n")
+
+def console_add_bracket(todo):
+    return "[ ] " + todo
 
 def write_to_file(todo_list, todo_file):
         with open(todo_file, 'w', encoding="utf-8") as file:
@@ -234,10 +237,14 @@ def add_new_file():
     file_list.append(file_name)
     return file_name
 
-def add_task(user_action, file_to_edit, undo = False):
+def add_task(user_action, file_to_edit, undo = False, gui = False):
     global undo_opt
-    todo = user_action[4:].capitalize()
-    todo = "[ ] " + todo
+    if not gui:
+        todo = user_action[4:].capitalize()
+    else:
+        todo = user_action
+    message = todo
+    todo = console_add_bracket(todo)
     todos = get_todos(file_to_edit)
     todos.append(todo)
     try:
@@ -246,14 +253,18 @@ def add_task(user_action, file_to_edit, undo = False):
         print("Failed to save file to disk.")
     else:
         if not undo:
-            print_msg_box(f'Added {todo[4:]} to list.')
+            print_msg_box(f'Added {message} to list.')
         else:
-            print_msg_box(f'Added {todo[4:]} to list via UNDO command.','UNDO','Type UNDO to REDO.')
+            print_msg_box(f'Added {message} to list via UNDO command.','UNDO','Type UNDO to REDO.')
         undo_opt.update({'last':'add'})
 
-def edit_task(user_action, file_to_edit):
+def edit_task(user_action, file_to_edit, gui=False, new_edit = ""):
     todos = get_todos(file_to_edit)
-    selection = user_action[5]
+    if not gui:
+        selection = user_action[5]
+    else:
+        selection = str(todos.index(user_action) + 1)
+    
     try:
         selection = int(selection.strip()) - 1
     except ValueError:
@@ -264,14 +275,17 @@ def edit_task(user_action, file_to_edit):
         except IndexError:
             print_msg_box("No task with that number is in your list.", "ERROR", "")
         else:
-            if user_action[7:] == "":
-                print_msg_box(f'Enter the new task for todo task {old_todo[4:].capitalize()}', "DIRECTIONS", " Type COMMAND for more info.")
-                edit_todo = input()
-            else:
-                if user_action[6] != " ":
-                    edit_todo = user_action[6:].capitalize()
+            if not gui:
+                if user_action[7:] == "":
+                    print_msg_box(f'Enter the new task for todo task {old_todo[4:].capitalize()}', "DIRECTIONS", " Type COMMAND for more info.")
+                    edit_todo = input()
                 else:
-                    edit_todo = user_action[7:].capitalize()
+                    if user_action[6] != " ":
+                        edit_todo = user_action[6:].capitalize()
+                    else:
+                        edit_todo = user_action[7:].capitalize()
+            else:
+                edit_todo = new_edit
             edit_todo = "[ ] " + edit_todo
             todos = get_todos(file_to_edit)
             todos[selection] = edit_todo
@@ -344,7 +358,6 @@ def mark_task(user_action, file_to_edit, mark = True, undo = False):
                     title_bar(file_to_edit)
                     print_msg_box(f'Task: {todos[selection][4:].capitalize()} UNmarked.')
                     undo_opt.update({'last':'unmark','data':selection}) 
-
 
 def remove_marked_tasks(file_to_edit):
     while True:
