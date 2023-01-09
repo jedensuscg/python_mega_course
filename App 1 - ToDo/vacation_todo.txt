@@ -1,6 +1,7 @@
-[ ] Wash Car
+[ ] Wash Dog
 [ ] Set alarm
 [ ] Lower AC Temp
 [ ] Take out trash
 [ ] Pay bills
 [ ] Turn on sprinkler system
+[ ] Test

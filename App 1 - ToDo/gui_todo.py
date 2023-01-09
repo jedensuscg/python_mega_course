@@ -5,11 +5,11 @@ from functions import (
     show_options, undo, save_config, clear, get_undo_opt, show_file_menu, get_file_list)
 
 import PySimpleGUI as sg
+console_flag = False
 
 load_config()
 file_to_edit = startup()
 todos = get_todos(file_to_edit)
-
 sg.theme('Dark Amber')
 label = sg.Text("Type in a ToDo")
 input_box = sg.InputText(tooltip="Enter ToDo", key="todo")
@@ -17,37 +17,14 @@ add_button = sg.Button("Add")
 list_box = sg.Listbox(values = todos, key="todo_list", 
     enable_events=True, size=[45,20])
 edit_button = sg.Button("Edit")
-
-
+console_button = sg.Button("Console")
 window = sg.Window('TODO APP',layout=
     [[label,input_box,add_button],
-    [list_box, edit_button]], 
+    [list_box, edit_button],
+    [console_button]], 
     font = ('Helvetica', 14))
 
-
-
-while True:
-    event, values= window.read()
-    print(event)
-    print(values)
-    match event:
-        case "Add":
-            add_task(values['todo'],file_to_edit, gui=True)
-            todos = get_todos(file_to_edit)
-            window['todo_list'].update(todos)
-            window['todo'].update(value="")
-        case "Edit":
-            edit_task(values['todo_list'][0], file_to_edit, gui=True, new_edit = values['todo'])
-            todos = get_todos(file_to_edit)
-            window['todo_list'].update(todos)
-            window['todo'].update(value="")
-        case 'todo_list':
-            window['todo'].update(value=values['todo_list'][0][4:])
-        case sg.WIN_CLOSED:
-            break
-window.close()
-
-def main():
+def console():
     
     load_config()
     file_to_edit = startup()
@@ -127,7 +104,40 @@ def main():
             break
         else:
             print("!!! Command not recognized. Type commands to see list of available commands !!!\n")
-    print("Exiting")
+    print("Returning to GUI Mode")
+def gui():
+    global console_flag
+    while True:
+        event, values= window.read()
+        print(event)
+        print(values)
+        match event:
+            case "Add":
+                add_task(values['todo'],file_to_edit, gui=True)
+                todos = get_todos(file_to_edit)
+                window['todo_list'].update(todos)
+                window['todo'].update(value="")
+            case "Edit":
+                edit_task(values['todo_list'][0], file_to_edit, gui=True, new_edit = values['todo'])
+                todos = get_todos(file_to_edit)
+                window['todo_list'].update(todos)
+                window['todo'].update(value="")
+            case 'todo_list':
+                window['todo'].update(value=values['todo_list'][0][4:])
+            case 'Console':
+                console()
+            case sg.WIN_CLOSED:
+                break
+        if console_flag == True:
+            console()
+        else:
+            gui()
+
+gui()
+
+window.close()
+
+
 
 # if __name__ == "__main__":
 #     main() 
