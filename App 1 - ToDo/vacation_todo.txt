@@ -2,6 +2,5 @@
 [ ] Set alarm
 [ ] Set AC Temp
 [ ] Take out trash
-[X] Pay bills
 [ ] Turn on sprinkler system
 [ ] Water plants

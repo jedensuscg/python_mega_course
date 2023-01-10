@@ -7,6 +7,7 @@ from functions import (
 import PySimpleGUI as sg
 console_flag = False
 exit_flag = False
+debug_flag = False
 load_config()
 file_to_edit = startup()
 todos = get_todos(file_to_edit)
@@ -20,10 +21,11 @@ list_box = sg.Listbox(values = todos, key="todo_list",
 edit_button = sg.Button("Edit Task", key="edit")
 delete_button =sg.Button("Delete Task", key="delete")
 console_button = sg.Button("Console")
+debug_toggle = sg.Checkbox('Print Debug Messages to console', key='debug')
 
 top_row = [[label,input_box,add_button]]
 
-list_col = [[list_box],[console_button]]
+list_col = [[list_box],[console_button, debug_toggle]]
 
 button_col = [[edit_button],[delete_button]]
 
@@ -114,12 +116,18 @@ def console(file_to_edit):
     print("Returning to GUI Mode")
 
 def gui():
-    layout = 2
     global console_flag
     while True:
         event, values= window.read()
-        print(event)
-        print(values)
+        try:
+            if values['debug'] == True:
+                print(f'Debug Start\nEvent Captured: {event}')
+                print('Values of Event Captured')
+                for key,value in values.items():
+                    print(f'    {key} : {value}')
+                print('End Debug')
+        except:
+            pass
         match event:
             case "add":
                 add_task(values['todo'],file_to_edit, gui=True)
@@ -132,7 +140,7 @@ def gui():
                 window['todo_list'].update(todos)
                 window['todo'].update(value="")
             case "delete":
-                #delete_task(values['todo_list'][0], file_to_edit, gui=True, new_edit = values['todo'])
+                delete_task(values['todo_list'][0], file_to_edit, gui=True)
                 todos = get_todos(file_to_edit)
                 window['todo_list'].update(todos)
                 window['todo'].update(value="")

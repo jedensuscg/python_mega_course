@@ -398,16 +398,17 @@ def remove_marked_tasks(file_to_edit):
         
 def delete_task(user_action, file_to_edit, undo = False, gui = False):
     global undo_opt
-    
+    todos = get_todos(file_to_edit)
     if not gui:
         selection = user_action[5]
+        if not undo:
+            selection = user_action[6:]
+        else:
+            selection = user_action - 1
     else:
         selection = str(todos.index(user_action) + 1)
 
-    if not undo:
-        selection = user_action[6:]
-    else:
-        selection = user_action - 1
+
     try:
         if not undo:
             selection = int(selection.strip()) - 1
