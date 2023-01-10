@@ -1,6 +1,4 @@
-[ ] Wash Window
 [ ] Set alarm
 [ ] Set AC Temp
 [ ] Take out trash
 [ ] Turn on sprinkler system
-[ ] Water plants

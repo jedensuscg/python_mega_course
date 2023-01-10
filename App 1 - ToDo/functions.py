@@ -359,12 +359,17 @@ def mark_task(user_action, file_to_edit, mark = True, undo = False):
                     print_msg_box(f'Task: {todos[selection][4:].capitalize()} UNmarked.')
                     undo_opt.update({'last':'unmark','data':selection}) 
 
-def remove_marked_tasks(file_to_edit):
+def remove_marked_tasks(file_to_edit, gui = False, confirm = False):
     while True:
-        title_bar(file_to_edit)
+        if not gui:
+            title_bar(file_to_edit)
         
-        print_msg_box(f'CONFIRM remove all completed tasks? (Y/N)', "CONFIRMATION", "Type y or n to continue")
-        user_action = format_input(input())
+        if not confirm:
+            print_msg_box(f'CONFIRM remove all completed tasks? (Y/N)', "CONFIRMATION", "Type y or n to continue")
+            user_action = format_input(input())
+        else:
+            user_action = 'y'
+
         if user_action == 'y':
             new_todos = []
             removed_todos = []

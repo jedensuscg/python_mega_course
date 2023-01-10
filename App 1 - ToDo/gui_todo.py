@@ -22,12 +22,13 @@ edit_button = sg.Button("Edit Task", key="edit")
 delete_button =sg.Button("Delete Task", key="delete")
 console_button = sg.Button("Console")
 debug_toggle = sg.Checkbox('Print Debug Messages to console', key='debug')
+remove_marked_button = sg.Button('Remove Marked', key='remove')
 
 top_row = [[label,input_box,add_button]]
 
 list_col = [[list_box],[console_button, debug_toggle]]
 
-button_col = [[edit_button],[delete_button]]
+button_col = [[edit_button],[delete_button],[remove_marked_button]]
 
 console_layout = [[sg.Text("RUNNING IN CONSOLE MODE")],
     [sg.Text("Type exit in console to return to GUI mode.")]]
@@ -144,6 +145,15 @@ def gui():
                 todos = get_todos(file_to_edit)
                 window['todo_list'].update(todos)
                 window['todo'].update(value="")
+            case 'remove':
+                clicked = sg.PopupYesNo('Confirm deletion of ALL Marked [X] tasks?')
+                if clicked == 'Yes':
+                    remove_marked_tasks(file_to_edit, gui=True, confirm=True)
+                    todos = get_todos(file_to_edit)
+                    window['todo_list'].update(todos)
+                    window['todo'].update(value="")
+                else:
+                    pass
             case 'todo_list':
                 window['todo'].update(value=values['todo_list'][0][4:])
             case 'Console':
