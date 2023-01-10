@@ -396,8 +396,14 @@ def remove_marked_tasks(file_to_edit):
             title_bar(file_to_edit)
             print_msg_box("You did not type 'y' or 'n'", "ERROR", "")
         
-def delete_task(user_action, file_to_edit, undo = False):
+def delete_task(user_action, file_to_edit, undo = False, gui = False):
     global undo_opt
+    
+    if not gui:
+        selection = user_action[5]
+    else:
+        selection = str(todos.index(user_action) + 1)
+
     if not undo:
         selection = user_action[6:]
     else:

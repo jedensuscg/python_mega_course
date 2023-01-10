@@ -6,30 +6,38 @@ from functions import (
 
 import PySimpleGUI as sg
 console_flag = False
-
+exit_flag = False
 load_config()
 file_to_edit = startup()
 todos = get_todos(file_to_edit)
+
 sg.theme('Dark Amber')
-label = sg.Text("Type in a ToDo")
+label = sg.Text("Type in a ToDo", key='label')
 input_box = sg.InputText(tooltip="Enter ToDo", key="todo")
-add_button = sg.Button("Add")
+add_button = sg.Button("Add", key='add')
 list_box = sg.Listbox(values = todos, key="todo_list", 
     enable_events=True, size=[45,20])
-edit_button = sg.Button("Edit")
+edit_button = sg.Button("Edit Task", key="edit")
+delete_button =sg.Button("Delete Task", key="delete")
 console_button = sg.Button("Console")
-window = sg.Window('TODO APP',layout=
-    [[label,input_box,add_button],
-    [list_box, edit_button],
-    [console_button]], 
+
+top_row = [[label,input_box,add_button]]
+
+list_col = [[list_box],[console_button]]
+
+button_col = [[edit_button],[delete_button]]
+
+console_layout = [[sg.Text("RUNNING IN CONSOLE MODE")],
+    [sg.Text("Type exit in console to return to GUI mode.")]]
+
+layout = [[ top_row ,sg.Column(list_col, key="-COL2-"),
+            sg.Column(button_col, key="-COL3-"),sg.Column(console_layout, visible = False, key="-COL4-")]]
+window = sg.Window('TODO APP',layout, 
     font = ('Helvetica', 14))
 
-def console():
-    
-    load_config()
-    file_to_edit = startup()
-    todos = get_todos(file_to_edit)
-    
+layout = 1
+
+def console(file_to_edit):    
     while True:
         while True:
             print("\n***MAIN MENU***")
@@ -99,39 +107,57 @@ def console():
             undo((get_undo_opt()), file_to_edit)
 
         elif user_action.startswith("exit"):
-            save_config(file_to_edit, get_file_list())
             clear()
             break
         else:
             print("!!! Command not recognized. Type commands to see list of available commands !!!\n")
     print("Returning to GUI Mode")
+
 def gui():
+    layout = 2
     global console_flag
     while True:
         event, values= window.read()
         print(event)
         print(values)
         match event:
-            case "Add":
+            case "add":
                 add_task(values['todo'],file_to_edit, gui=True)
                 todos = get_todos(file_to_edit)
                 window['todo_list'].update(todos)
                 window['todo'].update(value="")
-            case "Edit":
+            case "exit":
                 edit_task(values['todo_list'][0], file_to_edit, gui=True, new_edit = values['todo'])
+                todos = get_todos(file_to_edit)
+                window['todo_list'].update(todos)
+                window['todo'].update(value="")
+            case "delete":
+                #delete_task(values['todo_list'][0], file_to_edit, gui=True, new_edit = values['todo'])
                 todos = get_todos(file_to_edit)
                 window['todo_list'].update(todos)
                 window['todo'].update(value="")
             case 'todo_list':
                 window['todo'].update(value=values['todo_list'][0][4:])
             case 'Console':
-                console()
+                window[f'-COL2-'].update(visible=False)
+                window[f'-COL3-'].update(visible=False)
+                window['todo'].update(visible=False)
+                window['add'].update(visible=False)
+                window['label'].update(visible=False)
+                window[f'-COL4-'].update(visible=True)
+                console(file_to_edit)
+                window[f'-COL2-'].update(visible=True)
+                window[f'-COL3-'].update(visible=True)
+                window['todo'].update(visible=True)
+                window['add'].update(visible=True)
+                window['label'].update(visible=True)
+                window[f'-COL4-'].update(visible=False)
+                todos = get_todos(file_to_edit)
+                window['todo_list'].update(todos)
             case sg.WIN_CLOSED:
                 break
-        if console_flag == True:
-            console()
-        else:
-            gui()
+        
+
 
 gui()
 
