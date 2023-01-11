@@ -2,3 +2,4 @@
 [ ] Set AC Temp
 [ ] Take out trash
 [ ] Turn on sprinkler system
+[X] test2

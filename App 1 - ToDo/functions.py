@@ -296,15 +296,21 @@ def edit_task(user_action, file_to_edit, gui=False, new_edit = ""):
             else:
                 print_msg_box(f'Replaced TODO task successfully \'{old_todo[4:].capitalize()}\' with \'{edit_todo[4:].capitalize()}\' ')
 
-def mark_task(user_action, file_to_edit, mark = True, undo = False):
+def mark_task(user_action, file_to_edit, mark = True, undo = False, gui=False):
     global undo_opt
     todos = get_todos(file_to_edit)
 
     if mark:
         if not undo:
-            selection = user_action[4:]
+            if gui:
+                selection = str(todos.index(user_action) + 1)
+            else:
+                selection = user_action[4:]
         else:
-            selection = str(user_action + 1)
+            if gui:
+                selection = str(todos.index(user_action) + 1)
+            else:
+                selection = str(user_action + 1)
         try:
             selection = int(selection.strip()) - 1
         except ValueError:

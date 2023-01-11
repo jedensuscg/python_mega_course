@@ -17,18 +17,20 @@ label = sg.Text("Type in a ToDo", key='label')
 input_box = sg.InputText(tooltip="Enter ToDo", key="todo")
 add_button = sg.Button("Add", key='add')
 list_box = sg.Listbox(values = todos, key="todo_list", 
-    enable_events=True, size=[45,20])
+    enable_events=True, size=[40,20])
 edit_button = sg.Button("Edit Task", key="edit")
 delete_button =sg.Button("Delete Task", key="delete")
+mark_button = sg.Button('Mark Complete', key='mark')
 console_button = sg.Button("Console")
 debug_toggle = sg.Checkbox('Print Debug Messages to console', key='debug')
 remove_marked_button = sg.Button('Remove Marked', key='remove')
+msg_text = sg.Text('', key='msg')
 
 top_row = [[label,input_box,add_button]]
 
-list_col = [[list_box],[console_button, debug_toggle]]
+list_col = [[list_box],[msg_text],[console_button, debug_toggle]]
 
-button_col = [[edit_button],[delete_button],[remove_marked_button]]
+button_col = [[edit_button],[delete_button],[mark_button],[remove_marked_button]]
 
 console_layout = [[sg.Text("RUNNING IN CONSOLE MODE")],
     [sg.Text("Type exit in console to return to GUI mode.")]]
@@ -131,21 +133,50 @@ def gui():
             pass
         match event:
             case "add":
-                add_task(values['todo'],file_to_edit, gui=True)
-                todos = get_todos(file_to_edit)
-                window['todo_list'].update(todos)
-                window['todo'].update(value="")
-            case "exit":
-                edit_task(values['todo_list'][0], file_to_edit, gui=True, new_edit = values['todo'])
-                todos = get_todos(file_to_edit)
-                window['todo_list'].update(todos)
-                window['todo'].update(value="")
+                window['msg'].update(value='')
+                if values['todo'] == '':
+                    print('DEBUG: Can not add blank ToDo')
+                    window['msg'].update(value='Can not add blank ToDo')
+                else:
+                    add_task(values['todo'],file_to_edit, gui=True)
+                    todos = get_todos(file_to_edit)
+                    window['todo_list'].update(todos)
+                    window['todo'].update(value="")
+            case "edit":
+                window['msg'].update(value='')
+                if not values['todo_list']:
+                    print('DEBUG: Nothing Selected to edit')
+                    window['msg'].update(value='Nothing selected to edit!')
+                elif values['todo'] == '':
+                    print('DEBUG: Edit text is blank!')
+                    window['msg'].update(value='Edit text is blank!')
+                else:
+                    edit_task(values['todo_list'][0], file_to_edit, gui=True, new_edit = values['todo'])
+                    todos = get_todos(file_to_edit)
+                    window['todo_list'].update(todos)
+                    window['todo'].update(value="")
             case "delete":
-                delete_task(values['todo_list'][0], file_to_edit, gui=True)
-                todos = get_todos(file_to_edit)
-                window['todo_list'].update(todos)
-                window['todo'].update(value="")
+                window['msg'].update(value='')
+                if not values['todo_list']:
+                    print('DEBUG: Nothing Selected to delete')
+                    window['msg'].update(value='Nothing selected to delete!')
+                else:
+                    delete_task(values['todo_list'][0], file_to_edit, gui=True)
+                    todos = get_todos(file_to_edit)
+                    window['todo_list'].update(todos)
+                    window['todo'].update(value="")
+            case 'mark':
+                window['msg'].update(value='')
+                if not values['todo_list']:
+                    print('DEBUG: Nothing Selected to mark')
+                    window['msg'].update(value='Nothing selected to mark!')
+                else:
+                    mark_task(values['todo_list'][0], file_to_edit, gui=True)
+                    todos = get_todos(file_to_edit)
+                    window['todo_list'].update(todos)
+                    window['todo'].update(value="")
             case 'remove':
+                window['msg'].update(value='')
                 clicked = sg.PopupYesNo('Confirm deletion of ALL Marked [X] tasks?')
                 if clicked == 'Yes':
                     remove_marked_tasks(file_to_edit, gui=True, confirm=True)
@@ -155,6 +186,7 @@ def gui():
                 else:
                     pass
             case 'todo_list':
+                window['msg'].update(value='')
                 window['todo'].update(value=values['todo_list'][0][4:])
             case 'Console':
                 window[f'-COL2-'].update(visible=False)
