@@ -242,7 +242,10 @@ def add_task(user_action, file_to_edit, undo = False, gui = False):
     if not gui:
         todo = user_action[4:].capitalize()
     else:
-        todo = user_action
+        if not undo:
+            todo = user_action
+        else:
+            todo = user_action[4:]
     message = todo
     todo = console_add_bracket(todo)
     todos = get_todos(file_to_edit)
@@ -366,6 +369,7 @@ def mark_task(user_action, file_to_edit, mark = True, undo = False, gui=False):
                     undo_opt.update({'last':'unmark','data':selection}) 
 
 def remove_marked_tasks(file_to_edit, gui = False, confirm = False):
+    global undo_opt
     while True:
         if not gui:
             title_bar(file_to_edit)
@@ -380,6 +384,7 @@ def remove_marked_tasks(file_to_edit, gui = False, confirm = False):
             new_todos = []
             removed_todos = []
             todos = get_todos(file_to_edit)
+            original_todos = todos
             for i in todos:
                 if i[1] != 'X':
                     new_todos.append(i)
@@ -399,6 +404,7 @@ def remove_marked_tasks(file_to_edit, gui = False, confirm = False):
                 else:
                     title_bar(file_to_edit)
                     print_msg_box(f'Removed {len(removed_todos)} successfully')
+                    undo_opt.update({'last':'remove','data':original_todos})
                     break
         elif user_action == 'n':
             title_bar(file_to_edit)
@@ -417,7 +423,10 @@ def delete_task(user_action, file_to_edit, undo = False, gui = False):
         else:
             selection = user_action - 1
     else:
-        selection = str(todos.index(user_action) + 1)
+        if not undo:
+            selection = str(todos.index(user_action) + 1)
+        else:
+            selection = user_action - 1
 
 
     try:
@@ -445,17 +454,27 @@ def delete_task(user_action, file_to_edit, undo = False, gui = False):
             except:
                 print("Failed to save file to disk.")   
 
-def undo(undo, file_to_edit):
+def undo(undo, file_to_edit, gui = False):
+    global undo_opt
     match undo['last']:
         case "add":
             selection = len(get_todos(file_to_edit))
-            delete_task(selection, file_to_edit, True)
+            delete_task(selection, file_to_edit, undo = True, gui = gui)
         case 'delete':
-            add_task(undo['data'],file_to_edit, True)
+            add_task(undo['data'],file_to_edit, undo = True, gui = gui)
         case 'mark':
-            mark_task(undo['data'],file_to_edit, mark = False, undo = True)
+            mark_task(undo['data'],file_to_edit, mark = False, undo = True,gui = gui)
         case 'unmark':
-            mark_task(undo['data'],file_to_edit, mark = True, undo = True)
+            mark_task(undo['data'],file_to_edit, mark = True, undo = True,gui = gui)
+        case 'remove':
+            todos = []
+            for todo in undo['data']:
+                todos.append(todo)
+            write_to_file(todos,file_to_edit)
+            print_msg_box("Undo 'Remove All Marked'", "NOTICE", "No Undo Available")
+
+                
+            
             
 
     

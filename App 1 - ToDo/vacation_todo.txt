@@ -1,5 +1,4 @@
 [ ] Set alarm
-[ ] Set AC Temp
 [ ] Take out trash
-[ ] Turn on sprinkler system
-[X] test2
+[ ] Test
+[ ] Test 3

@@ -24,13 +24,14 @@ mark_button = sg.Button('Mark Complete', key='mark')
 console_button = sg.Button("Console")
 debug_toggle = sg.Checkbox('Print Debug Messages to console', key='debug')
 remove_marked_button = sg.Button('Remove Marked', key='remove')
+undo_button = sg.Button('Undo Last', key='undo')
 msg_text = sg.Text('', key='msg')
 
 top_row = [[label,input_box,add_button]]
 
 list_col = [[list_box],[msg_text],[console_button, debug_toggle]]
 
-button_col = [[edit_button],[delete_button],[mark_button],[remove_marked_button]]
+button_col = [[edit_button],[delete_button],[mark_button],[remove_marked_button],[undo_button]]
 
 console_layout = [[sg.Text("RUNNING IN CONSOLE MODE")],
     [sg.Text("Type exit in console to return to GUI mode.")]]
@@ -185,9 +186,16 @@ def gui():
                     window['todo'].update(value="")
                 else:
                     pass
+            case 'undo':
+                undo(get_undo_opt(),file_to_edit, gui = True)
+                todos = get_todos(file_to_edit)
+                window['todo_list'].update(todos)
+                window['todo'].update(value="")
+                window['msg'].update(value='Completed UNDO command. Hit UNDO again to REDO')
             case 'todo_list':
                 window['msg'].update(value='')
                 window['todo'].update(value=values['todo_list'][0][4:])
+
             case 'Console':
                 window[f'-COL2-'].update(visible=False)
                 window[f'-COL3-'].update(visible=False)
