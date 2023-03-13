@@ -190,20 +190,25 @@ def show_file_menu(file_to_edit):
             file_to_edit = prompt_for_file()
             title_bar(file_to_edit)
             print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
+            save_config(file_to_edit, file_list)
             return file_to_edit
             
         elif user_action == '2':
             new_file = add_new_file()
-            save_config(file_to_edit, file_list)
+            with open(new_file, 'w') as fp:
+                pass
             print_msg_box(f'Created a new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
             while True:
                 user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
                 if user_action == 'y':
                     title_bar(new_file)
                     file_to_edit = new_file
+                    save_config(file_to_edit, file_list)
                     print_msg_box(f'Switched to new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
                     return file_to_edit
                 elif user_action == 'n':
+                    file_to_edit = file_to_edit
+                    save_config(file_to_edit, file_list)
                     break
                 else:
                     print("Invalid Selection")
@@ -474,7 +479,8 @@ def undo(undo, file_to_edit, gui = False):
             print_msg_box("Undo 'Remove All Marked'", "NOTICE", "No Undo Available")
 
                 
-            
+def get_file_to_edit():
+    return file_to_edit
             
 
     

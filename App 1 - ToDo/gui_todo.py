@@ -2,7 +2,7 @@ from functions import (
     underline_text, title_bar, format_input, add_task, 
     delete_task, edit_task, show_list, load_config, startup, 
     get_todos, print_welcome, mark_task, remove_marked_tasks,
-    show_options, undo, save_config, clear, get_undo_opt, show_file_menu, get_file_list)
+    show_options, undo, save_config, clear, get_undo_opt, show_file_menu, get_file_list, get_file_to_edit)
 
 import PySimpleGUI as sg
 console_flag = False
@@ -16,7 +16,7 @@ sg.theme('Dark Amber')
 label = sg.Text("Type in a ToDo", key='label')
 input_box = sg.InputText(tooltip="Enter ToDo", key="todo")
 add_button = sg.Button("Add", key='add')
-list_box = sg.Listbox(values = todos, key="todo_list", 
+list_box = sg.Listbox(values = get_todos(file_to_edit), key="todo_list", 
     enable_events=True, size=[40,20])
 edit_button = sg.Button("Edit Task", key="edit")
 delete_button =sg.Button("Delete Task", key="delete")
@@ -113,6 +113,7 @@ def console(file_to_edit):
             undo((get_undo_opt()), file_to_edit)
 
         elif user_action.startswith("exit"):
+            global list_box
             clear()
             break
         else:
@@ -121,6 +122,7 @@ def console(file_to_edit):
 
 def gui():
     global console_flag
+    global file_to_edit
     while True:
         event, values= window.read()
         try:
@@ -204,13 +206,15 @@ def gui():
                 window['label'].update(visible=False)
                 window[f'-COL4-'].update(visible=True)
                 console(file_to_edit)
+                load_config()
+                file_to_edit = startup()
+                todos = get_todos(file_to_edit)
                 window[f'-COL2-'].update(visible=True)
                 window[f'-COL3-'].update(visible=True)
                 window['todo'].update(visible=True)
                 window['add'].update(visible=True)
                 window['label'].update(visible=True)
                 window[f'-COL4-'].update(visible=False)
-                todos = get_todos(file_to_edit)
                 window['todo_list'].update(todos)
             case sg.WIN_CLOSED:
                 break

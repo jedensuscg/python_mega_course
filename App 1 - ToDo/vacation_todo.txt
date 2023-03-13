@@ -1,4 +1,3 @@
 [ ] Set alarm
-[ ] Take out trash
 [ ] Test
-[ ] Test 3
+[ ] Set alarm
