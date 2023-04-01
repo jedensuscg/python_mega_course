@@ -2,16 +2,20 @@ from functions import (
     underline_text, title_bar, format_input, add_task, 
     delete_task, edit_task, show_list, load_config, startup, 
     get_todos, print_welcome, mark_task, remove_marked_tasks,
-    show_options, undo, save_config, clear, get_undo_opt, show_file_menu, get_file_list, get_file_to_edit)
+    show_options, undo, save_config, clear, get_undo_opt, show_file_menu, get_file_list, get_file_to_edit,
+    format_filename)
 
 import PySimpleGUI as sg
+import os
 console_flag = False
 exit_flag = False
 debug_flag = False
 load_config()
 file_to_edit = startup()
 todos = get_todos(file_to_edit)
+working_directory = os.getcwd()
 
+#Setup GUI elements
 sg.theme('Dark Amber')
 label = sg.Text("Type in a ToDo", key='label')
 input_box = sg.InputText(tooltip="Enter ToDo", key="todo")
@@ -26,8 +30,11 @@ debug_toggle = sg.Checkbox('Print Debug Messages to console', key='debug')
 remove_marked_button = sg.Button('Remove Marked', key='remove')
 undo_button = sg.Button('Undo Last', key='undo')
 msg_text = sg.Text('', key='msg')
-
-top_row = [[label,input_box,add_button]]
+file_text = sg.Text(format_filename(file_to_edit) ,key='file_open')
+file_button = sg.FileBrowse('Browse',initial_folder='./lists/',file_types=[("txt Files","*.txt")])
+file_input = sg.InputText(key='-FILE_PATH-')
+file_open_button = sg.Button('Open',key='open_file')
+top_row = [[label,input_box,add_button],[file_text],[file_input,file_button, file_open_button]]
 
 list_col = [[list_box],[msg_text],[console_button, debug_toggle]]
 
@@ -197,7 +204,16 @@ def gui():
             case 'todo_list':
                 window['msg'].update(value='')
                 window['todo'].update(value=values['todo_list'][0][4:])
-
+            case 'open_file':
+                if values['-FILE_PATH-'] == '':
+                    window['-FILE_PATH-'].update('Please Select File')
+                else:
+                    file_to_edit = values['-FILE_PATH-'].split("/lists/",1)[1]
+                    todos = get_todos(file_to_edit)
+                    window['todo_list'].update(todos)
+                    file_name = format_filename(file_to_edit)
+                    window['file_open'].update(file_name)
+                    show_file_menu(file_to_edit, gui=True)
             case 'Console':
                 window[f'-COL2-'].update(visible=False)
                 window[f'-COL3-'].update(visible=False)
@@ -208,6 +224,7 @@ def gui():
                 console(file_to_edit)
                 load_config()
                 file_to_edit = startup()
+                file_open = format_filename(file_to_edit)
                 todos = get_todos(file_to_edit)
                 window[f'-COL2-'].update(visible=True)
                 window[f'-COL3-'].update(visible=True)
@@ -216,9 +233,13 @@ def gui():
                 window['label'].update(visible=True)
                 window[f'-COL4-'].update(visible=False)
                 window['todo_list'].update(todos)
+                window['file_open'].update(file_open)
             case sg.WIN_CLOSED:
                 break
         
+def format_filename(filename):
+        name = f'List Open: {filename.replace("_", " ").title()[:-4]}'
+        return name
 
 
 gui()

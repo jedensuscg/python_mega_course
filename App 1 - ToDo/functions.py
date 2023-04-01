@@ -4,7 +4,7 @@ import os.path
 import configparser
 import ast
 #TODO Add Help File
-
+default_list_path = './lists/'
 last_file = ""
 file_list = []
 file_open = ""
@@ -49,13 +49,14 @@ def startup():
     else:
         return prompt_for_file()
 
-def save_config(file_open, files):
-    file_list_string = ""
+def save_config(file_open, files,path=default_list_path):
+
     with open("config.ini", "w") as configfile:
         config.set('DEFAULT','LastFile',file_open)
         for filename in files:
-            if not os.path.exists(filename):
-                files.remove(filename)
+
+            if not os.path.exists( path+filename):
+                files.remove(path+filename)
         config.set('DEFAULT','FileList', f'{files}')
         config.write(configfile)
 
@@ -90,8 +91,10 @@ def show_list(todos):
 def console_add_bracket(todo):
     return "[ ] " + todo
 
-def write_to_file(todo_list, todo_file):
-        with open(todo_file, 'w', encoding="utf-8") as file:
+def write_to_file(todo_list, todo_file, path=default_list_path):
+        save_path = f'{path}{todo_file}'
+        print(save_path)
+        with open(save_path, 'w', encoding="utf-8") as file:
             for i in todo_list:
                 if i[0] != "[":
                     file.write("[ ] " + i + '\n')
@@ -128,6 +131,10 @@ def print_msg_box(message, title = "LAST ACTION ", sub_text = "type UNDO to undo
 
 def underline_text(text):
     return "\x1B[4m" + text + "\x1B[0m"
+
+def format_filename(filename):
+        name = f'List Open: {filename.replace("_", " ").title()[:-4]}'
+        return name
 
 def prompt_for_file():
 
@@ -182,46 +189,53 @@ def show_options(file_to_edit):
         else:
             print("Invalid Selection")
 
-def show_file_menu(file_to_edit):
-    while True:
-        print("**FILE MENU**\n")
-        user_action = format_input(input("Please make a selection:\n1: Select a different TODO file\n2: Add new TODO file \nType exit to cancel.\n"))
-        if user_action == '1':
-            file_to_edit = prompt_for_file()
-            title_bar(file_to_edit)
-            print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
-            save_config(file_to_edit, file_list)
-            return file_to_edit
-            
-        elif user_action == '2':
-            new_file = add_new_file()
-            with open(new_file, 'w') as fp:
-                pass
-            print_msg_box(f'Created a new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
-            while True:
-                user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
-                if user_action == 'y':
-                    title_bar(new_file)
-                    file_to_edit = new_file
-                    save_config(file_to_edit, file_list)
-                    print_msg_box(f'Switched to new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
-                    return file_to_edit
-                elif user_action == 'n':
-                    file_to_edit = file_to_edit
-                    save_config(file_to_edit, file_list)
-                    break
-                else:
-                    print("Invalid Selection")
-        elif user_action == 'exit':
-            title_bar(file_to_edit)
-            break
-        else:
-            print("Invalid Selection")
+def show_file_menu(file_to_edit, path=default_list_path, gui = False):
+    if not gui:
+        while True:
+            print("**FILE MENU**\n")
+            user_action = format_input(input("Please make a selection:\n1: Select a different TODO file\n2: Add new TODO file \nType exit to cancel.\n"))
+            if user_action == '1':
+                file_to_edit = prompt_for_file()
+                title_bar(file_to_edit)
+                print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
+                save_config(file_to_edit, file_list)
+                return file_to_edit
+                
+            elif user_action == '2':
+                new_file = add_new_file()
+                file_location = f'{path}{new_file}'
+                with open(file_location, 'w') as fp:
+                    pass
+                print_msg_box(f'Created a new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
+                while True:
+                    user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
+                    if user_action == 'y':
+                        title_bar(new_file)
+                        file_to_edit = new_file
+                        save_config(file_to_edit, file_list)
+                        print_msg_box(f'Switched to new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
+                        return file_to_edit
+                    elif user_action == 'n':
+                        file_to_edit = file_to_edit
+                        save_config(file_to_edit, file_list)
+                        break
+                    else:
+                        print("Invalid Selection")
+            elif user_action == 'exit':
+                title_bar(file_to_edit)
+                break
+            else:
+                print("Invalid Selection")
+    else:
+        title_bar(file_to_edit)
+        print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
+        save_config(file_to_edit, file_list)
 
 def get_todos(todo_file = "todos.txt"):
+    file_path = f'{default_list_path}{todo_file}'
     """ Opens todo file and returns list of tasks"""
-    if os.path.exists(todo_file):
-        with open(todo_file, 'r', encoding="utf-8") as file:
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding="utf-8") as file:
             if file.readlines() == "":
                 todos = []
             else:

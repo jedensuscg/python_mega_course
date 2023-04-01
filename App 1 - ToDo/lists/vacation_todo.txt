@@ -1,3 +1,3 @@
-[ ] Set alarm
+[ ] set alarm 1
 [ ] Test
 [ ] Set alarm
