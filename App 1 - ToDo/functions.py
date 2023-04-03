@@ -8,6 +8,7 @@ default_list_path = './lists/'
 last_file = ""
 file_list = []
 file_open = ""
+default_list = "my_list.txt"
 file_to_edit = ''
 undo_opt = {
     'last': '',
@@ -25,14 +26,15 @@ def clear():
         _ = system('clear')
 
 def init_config():
-        print("This appears to be the first time you have ran the TODO Software")
-        print("No config file found, creating new one.")
-        name = add_new_file()
+        print("No Lists Found, creating default list.")
+        print("No Config file found, creating new one.")
+        #name = add_new_file()
         config['DEFAULT'] = {
-        'LastFile' : 'todos.txt', 
-        'FileList' : [name],
-        'LoadLastAlways' : 'False'
+        'LastFile' : 'my_list.txt', 
+        'FileList' : [default_list],
+        'LoadLastAlways' : 'True'
         }
+        os.makedirs(default_list_path)
         with open("config.ini", "w") as configfile:
             config.write(configfile)
         load_config()
