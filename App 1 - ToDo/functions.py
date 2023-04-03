@@ -41,6 +41,10 @@ def init_config():
 
 def get_undo_opt():
     return undo_opt
+
+def get_file_to_edit():
+    return file_to_edit
+
 def get_file_list():
     return file_list
     
@@ -493,13 +497,7 @@ def undo(undo, file_to_edit, gui = False):
                 todos.append(todo)
             write_to_file(todos,file_to_edit)
             print_msg_box("Undo 'Remove All Marked'", "NOTICE", "No Undo Available")
-
-                
-def get_file_to_edit():
-    return file_to_edit
-            
-
-    
+              
 def title_bar(file_to_edit):
     clear()
     print('----------------------------TERMINAL OPERATED DAILY ORGANIZER----------------------------')

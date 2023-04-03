@@ -1,8 +1,8 @@
 from functions import (
     underline_text, title_bar, format_input, add_task, 
     delete_task, edit_task, show_list, load_config, startup, 
-    get_todos, print_welcome, mark_task, remove_marked_tasks,
-    show_options, undo, save_config, clear, get_undo_opt, show_file_menu, get_file_list, get_file_to_edit,
+    get_todos, mark_task, remove_marked_tasks,
+    show_options, undo, clear, get_undo_opt, show_file_menu, get_file_list, get_file_to_edit,
     format_filename)
 
 import PySimpleGUI as sg
@@ -35,6 +35,7 @@ file_button = sg.FileBrowse('Browse',initial_folder='./lists/',file_types=[("txt
 file_input = sg.InputText(key='-FILE_PATH-')
 file_open_button = sg.Button('Open',key='open_file')
 create_list_button = sg.Button('Create New List',key='create_list')
+exit_button =sg.Button('QUIT', key='-QUIT-',button_color="Red")
 top_row = [[label,input_box,add_button],[file_text],[file_input,file_button, file_open_button],[create_list_button]]
 
 list_col = [[list_box],[msg_text],[console_button, debug_toggle]]
