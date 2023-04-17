@@ -250,19 +250,21 @@ def show_file_menu(file_to_edit, path=default_list_path, gui = False):
 def get_todos(todo_file = "todos.txt"):
     file_path = f'{default_list_path}{todo_file}'
     """ Opens todo file and returns list of tasks"""
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding="utf-8") as file:
-            if file.readlines() == "":
-                todos = []
-            else:
-                file.seek(0)
-                todos_temp = file.readlines()
-                todos = [i.strip("\n") for i in todos_temp]
-                return todos
-    else:
-        file = open(file_path, 'w', encoding="utf-8")
-        todos = []
-        return todos
+    if not todo_file == '-NOLOAD-':
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding="utf-8") as file:
+                if file.readlines() == "":
+                    todos = []
+                else:
+                    file.seek(0)
+                    todos_temp = file.readlines()
+                    todos = [i.strip("\n") for i in todos_temp]
+                    return todos
+        else:
+            file = open(file_path, 'w', encoding="utf-8")
+            todos = []
+            return todos
+    return []
 
 def add_new_file(name = '',gui = True):
     if not gui:

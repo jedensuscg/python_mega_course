@@ -136,6 +136,9 @@ def console(file_to_edit):
 def gui():
     global console_flag
     global file_to_edit
+    if file_to_edit == '-NOLOAD-':
+        file = sg.popup_get_file("No list loaded. Select a list.","Select List",'./lists/','.txt')
+        file_to_edit = file.split("/lists/",1)[1]
     while True:
         event, values= window.read()
         try:
