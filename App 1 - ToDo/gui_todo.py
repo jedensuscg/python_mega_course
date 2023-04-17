@@ -1,15 +1,16 @@
 from functions import (
     underline_text, title_bar, format_input, add_task, 
-    delete_task, edit_task, show_list, load_config, startup, 
+    delete_task, edit_task, show_list, load_config, startup, add_new_file,
     get_todos, mark_task, remove_marked_tasks,
     show_options, undo, clear, get_undo_opt, show_file_menu, get_file_list, get_file_to_edit,
-    format_filename)
+    format_filename, delete_file)
 
 import PySimpleGUI as sg
 import os
 console_flag = False
 exit_flag = False
 debug_flag = False
+button_size = (15,1)
 load_config()
 file_to_edit = startup()
 todos = get_todos(file_to_edit)
@@ -22,21 +23,22 @@ input_box = sg.InputText(tooltip="Enter ToDo", key="todo")
 add_button = sg.Button("Add", key='add')
 list_box = sg.Listbox(values = get_todos(file_to_edit), key="todo_list", 
     enable_events=True, size=[40,20])
-edit_button = sg.Button("Edit Task", key="edit")
-delete_button =sg.Button("Delete Task", key="delete")
-mark_button = sg.Button('Mark Complete', key='mark')
+edit_button = sg.Button("Edit Task", key="edit",size=button_size)
+delete_button =sg.Button("Delete Task", key="delete",size=button_size)
+mark_button = sg.Button('Mark Complete', key='mark',size=button_size)
 console_button = sg.Button("Console")
 debug_toggle = sg.Checkbox('Print Debug Messages to console', key='debug')
-remove_marked_button = sg.Button('Remove Marked', key='remove')
-undo_button = sg.Button('Undo Last', key='undo')
+remove_marked_button = sg.Button('Remove Marked', key='remove',size=button_size)
+undo_button = sg.Button('Undo Last', key='undo',size=button_size)
 msg_text = sg.Text('', key='msg')
 file_text = sg.Text(format_filename(file_to_edit) ,key='file_open')
-file_button = sg.FileBrowse('Browse',initial_folder='./lists/',file_types=[("txt Files","*.txt")])
+file_button = sg.FileBrowse('Browse',initial_folder='./lists/',file_types=[("txt Files","*.txt")],size=(6,1))
 file_input = sg.InputText(key='-FILE_PATH-')
-file_open_button = sg.Button('Open',key='open_file')
-create_list_button = sg.Button('Create New List',key='create_list')
+file_open_button = sg.Button('Open',key='open_file',size=(6,1))
+create_list_button = sg.Button('Create New List',key='create_list',size=(15,1))
+delete_list_button = sg.Button('Delete Current List', key='delete_list',size=(15,1))
 exit_button =sg.Button('QUIT', key='-QUIT-',button_color="Red")
-top_row = [[label,input_box,add_button],[file_text],[file_input,file_button, file_open_button],[create_list_button]]
+top_row = [[label,input_box,add_button],[file_text],[file_input,file_button, file_open_button],[create_list_button,delete_list_button]]
 
 list_col = [[list_box],[msg_text],[console_button, debug_toggle]]
 
@@ -46,7 +48,9 @@ console_layout = [[sg.Text("RUNNING IN CONSOLE MODE")],
     [sg.Text("Type exit in console to return to GUI mode.")]]
 
 layout = [[ top_row ,sg.Column(list_col, key="-COL2-"),
-            sg.Column(button_col, key="-COL3-"),sg.Column(console_layout, visible = False, key="-COL4-")]]
+            sg.VSeperator(),
+            sg.Column(button_col, key="-COL3-"),
+            sg.Column(console_layout, visible = False, key="-COL4-")]]
 window = sg.Window('TODO APP',layout, 
     font = ('Helvetica', 14))
 
@@ -225,6 +229,19 @@ def gui():
             case 'create_list':
                 list_name = sg.popup_get_text('Enter a name for the list',title='Create List')
                 file_to_edit = list_name + ".txt"
+                todos = get_todos(file_to_edit)
+                window['todo_list'].update(todos)
+                file_display_name = format_filename(file_to_edit)
+                add_new_file(name = file_to_edit)
+                window['file_open'].update(file_display_name)
+                show_file_menu(file_to_edit, gui=True)
+            case 'delete_list':
+                confirm_delete = sg.popup_ok_cancel('Do you really want to delete this list?',title='Confirm Delete')
+                if confirm_delete == "OK":
+                    list_to_delete = list_name + ".txt"
+                    delete_file(list_to_delete)
+                if confirm_delete == "Cancel":
+                    pass
                 todos = get_todos(file_to_edit)
                 window['todo_list'].update(todos)
                 file_name = format_filename(file_to_edit)

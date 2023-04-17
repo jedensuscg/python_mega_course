@@ -34,7 +34,11 @@ def init_config():
         'FileList' : [default_list],
         'LoadLastAlways' : 'True'
         }
-        os.makedirs(default_list_path)
+        if not os.path.exists(default_list_path):
+            os.makedirs(default_list_path)
+        if not os.path.exists(default_list_path+default_list):
+            with open(default_list_path+default_list, 'w') as fp:
+                pass
         with open("config.ini", "w") as configfile:
             config.write(configfile)
         load_config()
@@ -60,8 +64,7 @@ def save_config(file_open, files,path=default_list_path):
     with open("config.ini", "w") as configfile:
         config.set('DEFAULT','LastFile',file_open)
         for filename in files:
-
-            if not os.path.exists( path+filename):
+            if not os.path.exists(path+filename):
                 files.remove(path+filename)
         config.set('DEFAULT','FileList', f'{files}')
         config.write(configfile)
@@ -72,9 +75,16 @@ def load_config():
 
     if os.path.exists("config.ini"):
         config.read("config.ini")
-        last_file = config['DEFAULT']['lastfile']
-        print("Opening last file called: "+ last_file)
-        file_list = ast.literal_eval(config['DEFAULT']['filelist'])
+        try:
+            last_file = config['DEFAULT']['lastfile']
+            if not os.path.exists(default_list_path+last_file):
+                last_file = '-NOLOAD-'
+                save_config(last_file,file_list)
+            print("Opening last file called: "+ last_file)
+            file_list = ast.literal_eval(config['DEFAULT']['filelist'])
+        except:
+            print("Error loading Config File: Creating new file.")
+            init_config()
     else:
         init_config()
 
@@ -250,17 +260,31 @@ def get_todos(todo_file = "todos.txt"):
                 todos = [i.strip("\n") for i in todos_temp]
                 return todos
     else:
-        file = open(todo_file, 'w', encoding="utf-8")
+        file = open(file_path, 'w', encoding="utf-8")
         todos = []
         return todos
 
-def add_new_file():
-    title_bar("Creating New TODO")
-    name = format_input(input("Please enter a name for the initial TODO list:\n"))
-    name = name.replace(" ","_")
-    file_name = name + ".txt"
-    file_list.append(file_name)
-    return file_name
+def add_new_file(name = '',gui = True):
+    if not gui:
+        title_bar("Creating New TODO")
+        name = format_input(input("Please enter a name for the initial TODO list:\n"))
+        name = name.replace(" ","_")
+        file_name = name + ".txt"
+        return file_name
+    else:
+        file_to_edit = name
+        file_list.append(file_to_edit)
+        if not os.path.exists(default_list_path+file_to_edit):
+            with open(f'{default_list_path}{file_to_edit}', 'w') as fp:
+                pass
+        save_config(file_to_edit,file_list)
+
+def delete_file(file):
+    title_bar("Deleting Todo List")
+    if os.path.exists(default_list_path+file):
+        os.remove(default_list_path+file)
+        file_list.remove(file)
+    
 
 def add_task(user_action, file_to_edit, undo = False, gui = False):
     global undo_opt
