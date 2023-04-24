@@ -285,7 +285,10 @@ def delete_file(file):
     title_bar("Deleting Todo List")
     if os.path.exists(default_list_path+file):
         os.remove(default_list_path+file)
-        file_list.remove(file)
+        try:
+            file_list.remove(file)
+        except:
+            pass
     
 
 def add_task(user_action, file_to_edit, undo = False, gui = False):

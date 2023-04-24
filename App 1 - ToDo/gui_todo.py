@@ -15,6 +15,7 @@ load_config()
 file_to_edit = startup()
 todos = get_todos(file_to_edit)
 working_directory = os.getcwd()
+lastfile = ''
 
 #Setup GUI elements
 sg.theme('Dark Blue')
@@ -38,6 +39,7 @@ file_open_button = sg.Button('Open',key='open_file',size=(6,1))
 create_list_button = sg.Button('Create New List',key='create_list',size=(15,1))
 delete_list_button = sg.Button('Delete Current List', key='delete_list',size=(15,1))
 exit_button =sg.Button('QUIT', key='-QUIT-',button_color="Red")
+noload_button = sg.Button('NOLOAD', key='noload', visible=False)
 top_row = [[label,input_box,add_button],[file_text],[file_input,file_button, file_open_button],[create_list_button,delete_list_button]]
 
 list_col = [[list_box],[msg_text],[console_button, debug_toggle]]
@@ -51,8 +53,7 @@ layout = [[ top_row ,sg.Column(list_col, key="-COL2-"),
             sg.VSeperator(),
             sg.Column(button_col, key="-COL3-"),
             sg.Column(console_layout, visible = False, key="-COL4-")]]
-window = sg.Window('TODO APP',layout, 
-    font = ('Helvetica', 14))
+window = sg.Window('TODO APP',layout, font = ('Helvetica', 14)).Finalize()
 
 layout = 1
 
@@ -132,13 +133,21 @@ def console(file_to_edit):
         else:
             print("!!! Command not recognized. Type commands to see list of available commands !!!\n")
     print("Returning to GUI Mode")
+def create_todo_fields():
+    window['todo'].update(visible=True)
+    window['add'].update(visible=True)
+    window['label'].update("Type in a ToDO")
 
+def hide_todo_fields():
+    window['todo'].update(visible=False)
+    window['add'].update(visible=False)
+    window['label'].update("")
 def gui():
     global console_flag
     global file_to_edit
-    if file_to_edit == '-NOLOAD-':
-        file = sg.popup_get_file("No list loaded. Select a list.","Select List",'./lists/','.txt')
-        file_to_edit = file.split("/lists/",1)[1]
+    if file_to_edit == "-NOLOAD-":
+
+        window.write_event_value('noload','noload')
     while True:
         event, values= window.read()
         try:
@@ -151,6 +160,9 @@ def gui():
         except:
             pass
         match event:
+            case "noload":
+                window['file_open'].update("Please select a list.")
+                hide_todo_fields()
             case "add":
                 window['msg'].update(value='')
                 if values['todo'] == '':
@@ -224,10 +236,12 @@ def gui():
                         file_to_edit = values['-FILE_PATH-'].split("/lists/",1)[1]
                     except IndexError:
                         window['file_open'].update("Invalid List")
+                    window['todo'].unhide_row()
                     todos = get_todos(file_to_edit)
                     window['todo_list'].update(todos)
                     file_name = format_filename(file_to_edit)
                     window['file_open'].update(file_name)
+                    create_todo_fields()
                     show_file_menu(file_to_edit, gui=True)
             case 'create_list':
                 list_name = sg.popup_get_text('Enter a name for the list',title='Create List')
@@ -237,19 +251,22 @@ def gui():
                 file_display_name = format_filename(file_to_edit)
                 add_new_file(name = file_to_edit)
                 window['file_open'].update(file_display_name)
+                create_todo_fields()
                 show_file_menu(file_to_edit, gui=True)
             case 'delete_list':
-                confirm_delete = sg.popup_ok_cancel('Do you really want to delete this list?',title='Confirm Delete')
-                if confirm_delete == "OK":
-                    list_to_delete = list_name + ".txt"
-                    delete_file(list_to_delete)
-                if confirm_delete == "Cancel":
+                if file_to_edit == "-NOLOAD-":
                     pass
-                todos = get_todos(file_to_edit)
-                window['todo_list'].update(todos)
-                file_name = format_filename(file_to_edit)
-                window['file_open'].update(file_name)
-                show_file_menu(file_to_edit, gui=True)
+                else:
+                    confirm_delete = sg.popup_ok_cancel('Do you really want to delete this list?',title='Confirm Delete')
+                    if confirm_delete == "OK":
+                        delete_file(file_to_edit)
+                    if confirm_delete == "Cancel":
+                        pass
+                    window['todo_list'].update('')
+                    hide_todo_fields()
+                    file_name = "NO Open List. Please Select One"
+                    window['file_open'].update(file_name)
+                    show_file_menu("-NOLOAD-", gui=True)
             case 'Console':
                 window[f'-COL2-'].update(visible=False)
                 window[f'-COL3-'].update(visible=False)
