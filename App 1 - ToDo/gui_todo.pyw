@@ -19,7 +19,9 @@ lastfile = ''
 
 #Setup GUI elements
 sg.theme('Dark Blue')
-label = sg.Text("Type in a ToDo", key='label')
+Title = sg.Text("PyTODO",key='-TITLE-',font = ('Helvetica', 30))
+Subtitle = sg.Text("By James",key='-SUBTITLE-',font = ('Helvetica', 9))
+label = sg.Text("Create New Task", key='label')
 input_box = sg.InputText(tooltip="Enter ToDo", key="todo")
 add_button = sg.Button("Add", key='add')
 list_box = sg.Listbox(values = get_todos(file_to_edit), key="todo_list", 
@@ -40,16 +42,17 @@ create_list_button = sg.Button('Create New List',key='create_list',size=(15,1))
 delete_list_button = sg.Button('Delete Current List', key='delete_list',size=(15,1))
 exit_button =sg.Button('QUIT', key='-QUIT-',button_color="Red")
 noload_button = sg.Button('NOLOAD', key='noload', visible=False)
+title_row = [Title,Subtitle]
 top_row = [[label,input_box,add_button],[file_text],[file_input,file_button, file_open_button],[create_list_button,delete_list_button]]
 
-list_col = [[list_box],[msg_text],[console_button, debug_toggle]]
+list_col = [[list_box],[msg_text]]
 
 button_col = [[edit_button],[delete_button],[mark_button],[remove_marked_button],[undo_button]]
 
 console_layout = [[sg.Text("RUNNING IN CONSOLE MODE")],
     [sg.Text("Type exit in console to return to GUI mode.")]]
 
-layout = [[ top_row ,sg.Column(list_col, key="-COL2-"),
+layout = [title_row,[ top_row ,sg.Column(list_col, key="-COL2-"),
             sg.VSeperator(),
             sg.Column(button_col, key="-COL3-"),
             sg.Column(console_layout, visible = False, key="-COL4-")]]
