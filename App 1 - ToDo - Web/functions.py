@@ -291,17 +291,11 @@ def delete_file(file):
             pass
     
 
-def add_task(user_action, file_to_edit, undo = False, gui = False):
-    global undo_opt
-    if not gui:
-        todo = user_action[4:].capitalize()
-    else:
-        if not undo:
-            todo = user_action
-        else:
-            todo = user_action[4:]
+def add_task(user_action, file_to_edit):
+
+    todo = user_action
     message = todo
-    #todo = console_add_bracket(todo)
+    todo = console_add_bracket(todo)
     todos = get_todos(file_to_edit)
     todos.append(todo)
     try:
@@ -309,11 +303,7 @@ def add_task(user_action, file_to_edit, undo = False, gui = False):
     except:
         print("Failed to save file to disk.")
     else:
-        if not undo:
-            print_msg_box(f'Added {message} to list.')
-        else:
-            print_msg_box(f'Added {message} to list via UNDO command.','UNDO','Type UNDO to REDO.')
-        undo_opt.update({'last':'add'})
+        print_msg_box(f'Added {message} to list.')
 
 def edit_task(user_action, file_to_edit, gui=False, new_edit = ""):
     todos = get_todos(file_to_edit)
@@ -353,74 +343,39 @@ def edit_task(user_action, file_to_edit, gui=False, new_edit = ""):
             else:
                 print_msg_box(f'Replaced TODO task successfully \'{old_todo[4:].capitalize()}\' with \'{edit_todo[4:].capitalize()}\' ')
 
-def mark_task(user_action, file_to_edit, mark = True, undo = False, gui=False):
-    global undo_opt
+def mark_task(user_action, file_to_edit, mark = True):
     todos = get_todos(file_to_edit)
 
     if mark:
-        if not undo:
-            if gui:
-                selection = str(todos.index(user_action) + 1)
-            else:
-                selection = user_action[4:]
-        else:
-            if gui:
-                selection = str(todos.index(user_action) + 1)
-            else:
-                selection = str(user_action + 1)
+        print(user_action)
+        selection = user_action
+        text = todos[selection]
+        result = ''
+        result = "[X] " + text[4:]
+        todos[selection] = result
         try:
-            selection = int(selection.strip()) - 1
-        except ValueError:
-            title_bar(file_to_edit)
-            print_msg_box("You did not enter a number", "ERROR", "Enter a valid number")
+            write_to_file(todos,file_to_edit)
+        except:
+            print("Failed to save file to disk.")
         else:
-            try:
-                text = todos[selection]  
-            except IndexError:
-                title_bar(file_to_edit)
-                print_msg_box("No task with that number is in your list.", "ERROR", "")
-            else:
-                result = ''
-                result = "[X] " + text[4:]
-                todos = get_todos(file_to_edit)
-                todos[selection] = result
-                try:
-                    write_to_file(todos,file_to_edit)
-                except:
-                    print("Failed to save file to disk.")
-                else:
-                    title_bar(file_to_edit)
-                    print_msg_box(f'Task: {todos[selection][4:].capitalize()} marked Complete.')
-                    undo_opt.update({'last':'mark','data':selection})
+            title_bar(file_to_edit)
+            print_msg_box(f'Task: {todos[selection][4:].capitalize()} marked Complete.')
+            undo_opt.update({'last':'mark','data':selection})
     else:
-        if not undo:
-            selection = user_action[4:]
-        else:
-            selection = str(user_action + 1)
+        selection = user_action
+        text = todos[selection]  
+        result = ''
+        result = "[ ] " + text[4:]
+        todos = get_todos(file_to_edit)
+        todos[selection] = result
         try:
-            selection = int(selection.strip()) - 1
-        except ValueError:
-            title_bar(file_to_edit)
-            print_msg_box("You did not enter a number", "ERROR", "Enter a valid number")
+            write_to_file(todos,file_to_edit)
+        except:
+            print("Failed to save file to disk.")
         else:
-            try:
-                text = todos[selection]  
-            except IndexError:
-                title_bar(file_to_edit)
-                print_msg_box("No task with that number is in your list.", "ERROR", "")
-            else:
-                result = ''
-                result = "[ ] " + text[4:]
-                todos = get_todos(file_to_edit)
-                todos[selection] = result
-                try:
-                    write_to_file(todos,file_to_edit)
-                except:
-                    print("Failed to save file to disk.")
-                else:
-                    title_bar(file_to_edit)
-                    print_msg_box(f'Task: {todos[selection][4:].capitalize()} UNmarked.')
-                    undo_opt.update({'last':'unmark','data':selection}) 
+            title_bar(file_to_edit)
+            print_msg_box(f'Task: {todos[selection][4:].capitalize()} UNmarked.')
+            undo_opt.update({'last':'unmark','data':selection}) 
 
 def remove_marked_tasks(file_to_edit, gui = False, confirm = False):
     global undo_opt
