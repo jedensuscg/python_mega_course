@@ -301,7 +301,7 @@ def add_task(user_action, file_to_edit, undo = False, gui = False):
         else:
             todo = user_action[4:]
     message = todo
-    todo = console_add_bracket(todo)
+    #todo = console_add_bracket(todo)
     todos = get_todos(file_to_edit)
     todos.append(todo)
     try:

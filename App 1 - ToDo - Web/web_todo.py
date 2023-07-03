@@ -19,3 +19,4 @@ st.subheader("The only note app you don't really need!")
 for todo in todos:
     st.checkbox(todo)
 
+st.text_input(label="",placeholder="Enter a new ToDo.")
