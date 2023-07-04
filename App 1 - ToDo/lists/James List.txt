@@ -1,2 +1,0 @@
-[ ] Add keyboard input
-[ ] Fix Car
