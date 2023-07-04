@@ -269,7 +269,6 @@ def gui():
                     hide_todo_fields()
                     file_name = "NO Open List. Please Select One"
                     window['file_open'].update(file_name)
-                    show_file_menu("-NOLOAD-", gui=True)
             case 'Console':
                 window[f'-COL2-'].update(visible=False)
                 window[f'-COL3-'].update(visible=False)

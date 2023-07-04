@@ -1,4 +1,3 @@
-[X] Add keyboard input
-[X] Fix Car
-[X] test
+[ ] Do Dishes
+[ ] Wash Car
 [ ] Test

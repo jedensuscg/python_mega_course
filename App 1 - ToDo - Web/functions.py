@@ -80,7 +80,7 @@ def load_config():
             if not os.path.exists(default_list_path+last_file):
                 last_file = '-NOLOAD-'
                 save_config(last_file,file_list)
-            print("Opening last file called: "+ last_file)
+            #print("Opening last file called: "+ last_file)
             file_list = ast.literal_eval(config['DEFAULT']['filelist'])
         except:
             print("Error loading Config File: Creating new file.")
@@ -95,7 +95,6 @@ def format_input(input):
     return input.lower().strip()
 
 def show_list(todos):
-    print("\n** TODO LIST **\n")
     if len(todos) > 0:
         for index, item in enumerate(todos):
             item = item.replace("\n", "")
@@ -109,7 +108,6 @@ def console_add_bracket(todo):
 
 def write_to_file(todo_list, todo_file, path=default_list_path):
         save_path = f'{path}{todo_file}'
-        print(save_path)
         with open(save_path, 'w', encoding="utf-8") as file:
             for i in todo_list:
                 if i[0] != "[":
@@ -173,7 +171,7 @@ def prompt_for_file():
                     except IndexError:
                         print("No file exist for number entered.")
                     else:
-                        title_bar(file)
+                        #title_bar(file)
                         return file_to_open
             
 def show_options(file_to_edit):
@@ -200,7 +198,7 @@ def show_options(file_to_edit):
                 else:
                     print("Invalid Selection")
         elif selection == 'exit':
-            title_bar(file_to_edit)
+            #title_bar(file_to_edit)
             break
         else:
             print("Invalid Selection")
@@ -212,8 +210,8 @@ def show_file_menu(file_to_edit, path=default_list_path, gui = False):
             user_action = format_input(input("Please make a selection:\n1: Select a different TODO file\n2: Add new TODO file \nType exit to cancel.\n"))
             if user_action == '1':
                 file_to_edit = prompt_for_file()
-                title_bar(file_to_edit)
-                print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
+                #title_bar(file_to_edit)
+                #print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
                 save_config(file_to_edit, file_list)
                 return file_to_edit
                 
@@ -222,14 +220,14 @@ def show_file_menu(file_to_edit, path=default_list_path, gui = False):
                 file_location = f'{path}{new_file}'
                 with open(file_location, 'w') as fp:
                     pass
-                print_msg_box(f'Created a new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
+                #print_msg_box(f'Created a new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
                 while True:
                     user_action = format_input(input("Do you want to edit this new TODO now? Y/N: "))
                     if user_action == 'y':
-                        title_bar(new_file)
+                        #title_bar(new_file)
                         file_to_edit = new_file
                         save_config(file_to_edit, file_list)
-                        print_msg_box(f'Switched to new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
+                        #print_msg_box(f'Switched to new TODO list named {file_to_edit[:-4].title().replace("_"," ")}')
                         return file_to_edit
                     elif user_action == 'n':
                         file_to_edit = file_to_edit
@@ -238,13 +236,13 @@ def show_file_menu(file_to_edit, path=default_list_path, gui = False):
                     else:
                         print("Invalid Selection")
             elif user_action == 'exit':
-                title_bar(file_to_edit)
+                #title_bar(file_to_edit)
                 break
             else:
                 print("Invalid Selection")
     else:
-        title_bar(file_to_edit)
-        print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
+        #title_bar(file_to_edit)
+        #print_msg_box(f'Changed to TODO list titled {file_to_edit[:-4].title().replace("_"," ")}')
         save_config(file_to_edit, file_list)
 
 def get_todos(todo_file = "todos.txt"):
@@ -268,7 +266,7 @@ def get_todos(todo_file = "todos.txt"):
 
 def add_new_file(name = '',gui = True):
     if not gui:
-        title_bar("Creating New TODO")
+        #title_bar("Creating New TODO")
         name = format_input(input("Please enter a name for the initial TODO list:\n"))
         name = name.replace(" ","_")
         file_name = name + ".txt"
@@ -282,7 +280,7 @@ def add_new_file(name = '',gui = True):
         save_config(file_to_edit,file_list)
 
 def delete_file(file):
-    title_bar("Deleting Todo List")
+    #title_bar("Deleting Todo List")
     if os.path.exists(default_list_path+file):
         os.remove(default_list_path+file)
         try:
@@ -303,7 +301,8 @@ def add_task(user_action, file_to_edit):
     except:
         print("Failed to save file to disk.")
     else:
-        print_msg_box(f'Added {message} to list.')
+        pass
+        #print_msg_box(f'Added {message} to list.')
 
 def edit_task(user_action, file_to_edit, gui=False, new_edit = ""):
     todos = get_todos(file_to_edit)
@@ -324,7 +323,7 @@ def edit_task(user_action, file_to_edit, gui=False, new_edit = ""):
         else:
             if not gui:
                 if user_action[7:] == "":
-                    print_msg_box(f'Enter the new task for todo task {old_todo[4:].capitalize()}', "DIRECTIONS", " Type COMMAND for more info.")
+                    #print_msg_box(f'Enter the new task for todo task {old_todo[4:].capitalize()}', "DIRECTIONS", " Type COMMAND for more info.")
                     edit_todo = input()
                 else:
                     if user_action[6] != " ":
@@ -347,7 +346,6 @@ def mark_task(user_action, file_to_edit, mark = True):
     todos = get_todos(file_to_edit)
 
     if mark:
-        print(user_action)
         selection = user_action
         text = todos[selection]
         result = ''
@@ -358,8 +356,8 @@ def mark_task(user_action, file_to_edit, mark = True):
         except:
             print("Failed to save file to disk.")
         else:
-            title_bar(file_to_edit)
-            print_msg_box(f'Task: {todos[selection][4:].capitalize()} marked Complete.')
+            #title_bar(file_to_edit)
+            #print_msg_box(f'Task: {todos[selection][4:].capitalize()} marked Complete.')
             undo_opt.update({'last':'mark','data':selection})
     else:
         selection = user_action
@@ -373,54 +371,37 @@ def mark_task(user_action, file_to_edit, mark = True):
         except:
             print("Failed to save file to disk.")
         else:
-            title_bar(file_to_edit)
-            print_msg_box(f'Task: {todos[selection][4:].capitalize()} UNmarked.')
+            #title_bar(file_to_edit)
+            #print_msg_box(f'Task: {todos[selection][4:].capitalize()} UNmarked.')
             undo_opt.update({'last':'unmark','data':selection}) 
 
-def remove_marked_tasks(file_to_edit, gui = False, confirm = False):
-    global undo_opt
+def remove_marked_tasks(file_to_edit):
     while True:
-        if not gui:
-            title_bar(file_to_edit)
-        
-        if not confirm:
-            print_msg_box(f'CONFIRM remove all completed tasks? (Y/N)', "CONFIRMATION", "Type y or n to continue")
-            user_action = format_input(input())
-        else:
-            user_action = 'y'
-
-        if user_action == 'y':
-            new_todos = []
-            removed_todos = []
-            todos = get_todos(file_to_edit)
-            original_todos = todos
-            for i in todos:
-                if i[1] != 'X':
-                    new_todos.append(i)
-                elif i[1] == 'X':
-                    removed_todos.append(i)
-            todos = new_todos
-            print_msg_box(f'')
-            if len(removed_todos) == 0:
-                title_bar(file_to_edit)
-                print_msg_box("No tasked were removed as none were marked as Complete.", "NOTICE", "Type mark <task#> to mark tasks.")
-                break
-            else:
-                try:
-                    write_to_file(todos,file_to_edit)
-                except:
-                    print("Failed to save file to disk.")
-                else:
-                    title_bar(file_to_edit)
-                    print_msg_box(f'Removed {len(removed_todos)} successfully')
-                    undo_opt.update({'last':'remove','data':original_todos})
-                    break
-        elif user_action == 'n':
-            title_bar(file_to_edit)
+        new_todos = []
+        removed_todos = []
+        todos = get_todos(file_to_edit)
+        original_todos = todos
+        for i in todos:
+            if i[1] != 'X':
+                new_todos.append(i)
+            elif i[1] == 'X':
+                removed_todos.append(i)
+        todos = new_todos
+        #print_msg_box(f'')
+        if len(removed_todos) == 0:
+            #title_bar(file_to_edit)
+            #print_msg_box("No tasked were removed as none were marked as Complete.", "NOTICE", "Type mark <task#> to mark tasks.")
             break
         else:
-            title_bar(file_to_edit)
-            print_msg_box("You did not type 'y' or 'n'", "ERROR", "")
+            try:
+                write_to_file(todos,file_to_edit)
+            except:
+                print("Failed to save file to disk.")
+            else:
+                #title_bar(file_to_edit)
+                #print_msg_box(f'Removed {len(removed_todos)} successfully')
+                undo_opt.update({'last':'remove','data':original_todos})
+                break
         
 def delete_task(user_action, file_to_edit, undo = False, gui = False):
     global undo_opt
@@ -453,10 +434,10 @@ def delete_task(user_action, file_to_edit, undo = False, gui = False):
             print_msg_box("No task with that number is in your list.",'ERROR','Enter a valid list number.')
         else:
             if undo:
-                print_msg_box(f'Removed task \'{removed_item[4:]}\' via UNDO command', 'UNDO', 'type UNDO to REDO this command')
+                #print_msg_box(f'Removed task \'{removed_item[4:]}\' via UNDO command', 'UNDO', 'type UNDO to REDO this command')
                 undo_opt.update({'last':'delete','data':removed_item})
             else:
-                print_msg_box(f'Removed task \'{removed_item[4:]}\' from list')
+                #print_msg_box(f'Removed task \'{removed_item[4:]}\' from list')
                 undo_opt.update({'last':'delete','data':removed_item})
             try:
                 write_to_file(todos,file_to_edit)
@@ -480,7 +461,7 @@ def undo(undo, file_to_edit, gui = False):
             for todo in undo['data']:
                 todos.append(todo)
             write_to_file(todos,file_to_edit)
-            print_msg_box("Undo 'Remove All Marked'", "NOTICE", "No Undo Available")
+            #print_msg_box("Undo 'Remove All Marked'", "NOTICE", "No Undo Available")
               
 def title_bar(file_to_edit):
     clear()
