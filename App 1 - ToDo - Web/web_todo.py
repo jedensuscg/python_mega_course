@@ -99,7 +99,7 @@ with st.sidebar:
     st.write("Menu")
     st.button("Delete Marked", key="delete_marked_button", on_click=delete_marked)
     display_filelist()
-    st.button("Create List", key="create_list_button", on_click=create_list)
+    st.write("Currently, adding or deleting lists in the web version is not possible.")
 
 
 with main:
